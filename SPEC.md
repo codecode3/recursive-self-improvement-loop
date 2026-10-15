@@ -2,9 +2,9 @@
 
 **What it does:** after a project ships, one command reads every Claude Code session that built it, subagents included. It finds where the human spent prompts and patience, proposes fixes and applies the ones the human approves. It also records what it predicted, so the next retro can check whether those fixes worked. The process runs on any project, not just music videos.
 
-**No scripts.** Agents do every stage by inference. They read the transcripts with ordinary shell commands and one-off parsing, the way the manual Slop retro did. The project is made of prompts only: one skill, five agents and the lens prompts.
+**No scripts.** Agents do every stage by inference. They read the transcripts with ordinary shell commands and one-off parsing, the way the manual Slop retro did. The project is made of prompts only: one skill, four agents and the lens prompts.
 
-Status: spec only, nothing built yet. Written 2026-10-14. Times are Central.
+Status: M1–M5 built on 2026-10-14 (the skill, 4 agents, 7 lenses, target notes, the Slop eval). Results are in `evals/slop-replay.md`. Times are Central.
 
 ---
 
@@ -80,7 +80,7 @@ The skill tells agents where each runtime keeps its logs. The agents work out th
   7 Report ── organized note + ledger entry + push notification           [main agent]
 ```
 
-The scout keeps the raw transcripts out of the main agent's context, so the main agent stays light enough to synthesize. After each stage, the main agent prints one line: `Retro: 1/7 scouted — 111 prompts, 10 h 28 m`.
+The scout keeps the raw transcripts out of the main agent's context, so the main agent stays light enough to synthesize. After each stage, the main agent prints one line: `Retro: 1/7 scouted — 112 prompts, 10 h 28 m`.
 
 ## 5. Stages in detail
 
@@ -107,7 +107,7 @@ The scout asks a question only when it can't tell whether a session belongs.
 - It excludes tool results, `isMeta` lines, compaction summaries, slash commands and their output, `<task-notification>`, `[Request interrupted…`, and system reminders.
 - Pasted text counts as a prompt and is marked as pasted.
 
-These are the rules that produced the 111-prompt count for Slop. The scout reports:
+On Slop this rule gives 112 prompts. The manual count said 111 because it dropped one pasted-only prompt. The scout reports:
 - prompts per session and in total;
 - wall time from first to last prompt;
 - time the human waited versus time the agent worked;
@@ -202,7 +202,8 @@ Rule hygiene: the synthesizer has a rule budget per guide. A retro that adds rul
 RSI-session-retro/
   SPEC.md, README.md
   lenses/*.md              one prompt per lens
-  claude-config/           git copy of the skill and agents below (synced, drift-checked)
+  targets/<family>.md      per-project notes (aliases, repos, rule files, tests, forbidden actions)
+  claude-config/           git copy of the skill and agents below (edit live, then cp + diff)
   evals/slop-replay.md     expected answers for the Slop replay (section 9)
   runs/                    per-run output (gitignored: transcripts hold private data)
   ledger.md
@@ -220,7 +221,7 @@ These live where the workspace expects them, `antigravity-projects/.claude/`, be
 
 Models and effort are set in each agent's frontmatter. The first real run checks the transcripts to confirm they took effect. The general-purpose agent is never used.
 
-**Per-project notes:** the target project can have a short `retro.md` that the scout and analysts read first. It lists:
+**Per-project notes:** `targets/<family>.md` (or a `retro.md` in the project), found by the target's name or alias. The scout and analysts read it first. It lists:
 - **Aliases** (for music videos: slop, hello tomorrow, frutiger aero realm, ne robei), so the scout finds sessions by name.
 - **Family** (music-video), for the `followup` lens.
 - **Rule files** (`CLAUDE.md`, `guide/*.md`, `template/*.md`).
@@ -250,7 +251,7 @@ Slop is the replay benchmark, because the manual run gives the expected answers.
 
 | Milestone | Builds | Accepted when |
 |---|---|---|
-| **M1** Scout | `retro` skill (stages 0–1), `retro-scout` agent, `evals/slop-replay.md` | On Slop, the scout finds `be559bb6` (+28 subagents), `4ba9f639`, `e078b0ec` and `d6e38151`; marks `4d1a7a68` as mention-only and today's retro sessions as retro; counts **111 prompts (75 / 18 / 12 / 6)**, **10 h 28 m**, **28 subagents**; names Juno and Hydra as hotspots. |
+| **M1** Scout | `retro` skill (stages 0–1), `retro-scout` agent, `evals/slop-replay.md` | On Slop, the scout finds `be559bb6` (+28 subagents), `4ba9f639`, `e078b0ec` and `d6e38151`; marks `4d1a7a68` as mention-only and today's retro sessions as retro; counts **112 prompts (76 / 18 / 12 / 6)**, **10 h 28 m**, **28 subagents**; names Juno as a hotspot. (The manual count said 111. It left out one pasted-only prompt.) |
 | **M2** Analysis | the lens prompts, `retro-analyst`, the synthesis section of the skill | The Slop report contains ≥ 8 of the 10 reference findings below, each with a quote and a time. |
 | **M3** Apply + verify | approval step, `retro-applier`, `retro-checker`, ledger | On a scratch copy of `music-videos`: commits land, tests pass, no contradictions remain, and no applier transcript contains a side-effect command. |
 | **M4** Recursion | `followup` lens, escalation | Replaying Hello Tomorrow → Slop shows which Hello Tomorrow-era rules were ignored on Slop. |
@@ -268,8 +269,8 @@ Slop is the replay benchmark, because the manual run gives the expected answers.
 9. Motion was only checked in stills: Studio lag was never measured, and things passed through each other.
 10. Subagent driving cost about 67% of the human's prompts. Fixes: a self-checking asset-builder, before/after images in reports, and an auto-dispatching backlog.
 
-## 10. Open questions (to answer before M3)
+## 10. Decisions (defaults chosen at build time; the human can change them)
 
-1. Each edit to the live `.claude/` files triggers Claude Code's permission prompt. Should appliers edit those files, or only write the change into `claude-config/` and leave the sync for the human?
-2. A project without a guide folder: should workspace-wide lessons go to its `CLAUDE.md`, to `antigravity-projects/AGENTS.md`, or to memory?
-3. When a project ships (for example a YouTube upload or a final commit), should the main agent offer `/retro` in one line, or wait to be asked?
+1. **`.claude/` edits:** appliers never edit live `.claude/` files. They hand the exact change to the main agent, which applies it after all the appliers finish. Claude Code's permission prompt on those edits is the human's check. Then the main agent syncs the git copy.
+2. **Lessons for every project:** project lessons go to the project's own rule files. Lessons for the whole workspace are marked `needs OK` and go to `antigravity-projects/AGENTS.md`.
+3. **When to retro:** only when asked. Nothing offers `/retro` on its own yet.
