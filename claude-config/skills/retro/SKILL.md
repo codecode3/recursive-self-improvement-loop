@@ -15,7 +15,7 @@ The home is `~/antigravity-projects/RSI-session-retro/` (RSI below). `SPEC.md` t
 
 **Progress:** after each stage, print one line, for example `Retro 2/7 analyzed: 8 lenses, 54 findings`. The human should never need to ask for status.
 
-**Agents:** `retro-scout`, `retro-analyst`, `retro-applier` and `retro-checker`, launched with the Agent tool, in the background. Never use general-purpose or fork as a stand-in. If an agent type is missing, stop and say so.
+**Agents:** `retro-scout`, `retro-analyst`, `retro-applier` and `retro-checker`, launched with the Agent tool, in the background. Never use general-purpose, claude or fork as a stand-in. If an agent type is missing, it was probably installed after this session started (agents load at session start). Stop, release the lock, and tell the human to start a new session and run the same command.
 
 ## 0. Lock and set up
 
@@ -121,8 +121,8 @@ Print the report's "What went wrong" section and the change sets just before ask
 3. **Enforceability:** confirm the checkers found no rule without a check. If they did, fix it in that same round.
 4. **Smoke test:** for each `.claude/` agent, skill or hook that was added or changed:
    - Confirm the file's frontmatter parses: name, description, tools, model.
-   - Confirm it appears in your available agents or skills.
-   - Run a new or changed agent once on a task with no side effects, such as a dry run or a read-only check of one item. If no safe task exists, add it to "Waiting on you".
+   - Confirm it appears in your available agents or skills. Skills reload during a session. **Agents load only when a session starts**, so a new or changed agent can't be launched until the next session.
+   - Run a changed agent that is already loaded once, on a task with no side effects, such as a dry run or a read-only check of one item. For a new agent, or when no safe task exists, add the exact test prompt to "Waiting on you".
 
 ## 7. Report and ledger
 
