@@ -6,4 +6,6 @@ There are no scripts. Every stage is done by agents through inference, so the pr
 
 Status: built (M1–M5). Run `/retro <project>`. Design: [SPEC.md](SPEC.md). Agents and skill: `claude-config/` (live copies in `antigravity-projects/.claude/`). Test: `evals/slop-replay.md`.
 
-After installing or changing an agent in `antigravity-projects/.claude/agents/`, start a new Claude Code session. Agents load at session start, while skills reload live.
+A newly installed or changed agent can take a few minutes to show up in a running session (skills reload at once). If `/retro` says an agent is missing, run it again shortly.
+
+Tested: the Slop replay on 2026-10-14 scored M1 8/8, M2 10/10, M3 pass and M4 5/5, in about 32 minutes with no human prompts (`evals/slop-replay.md`).

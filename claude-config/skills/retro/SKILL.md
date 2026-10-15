@@ -7,19 +7,20 @@ description: Automated retro of a finished project from its Claude Code session 
 
 The home is `~/antigravity-projects/RSI-session-retro/` (RSI below). `SPEC.md` there explains the design. You don't need to read it to run a retro. **The human types one prompt to start and answers one question.** Everything else is yours: no "are you done?", no "spawn N agents", no "anything else?".
 
-**Arguments:** `/retro <target> [--since <date>] [--replay <commit>] [--stage scout]`
+**Arguments:** `/retro <target> [--since <date>] [--replay <commit>] [--stage scout] [--run-dir <folder>]`
 - **target:** a project name or path. Its notes are the file in `RSI/targets/` whose Aliases line lists the target (`grep -il "<target>" RSI/targets/*.md`), or `retro.md` in the project. If neither exists, use the project's `CLAUDE.md` and `docs/`. Then write a short targets file yourself in stage 7, following `RSI/targets/music-videos.md`.
 - **Lessons with workspace scope** (any project, not just this one) are marked `needs OK` and go to `~/antigravity-projects/AGENTS.md`. Project lessons go to the project's own rule files.
 - **--replay <commit>:** a test run on a scratch copy. See "Replay mode".
 - **--stage scout:** stop after stage 1.
+- **--run-dir <folder>:** put the run folder (and the lock) there instead of `RSI/runs/`. Use the session scratchpad for a test that must leave no files in any repo.
 
 **Progress:** after each stage, print one line, for example `Retro 2/7 analyzed: 8 lenses, 54 findings`. The human should never need to ask for status.
 
-**Agents:** `retro-scout`, `retro-analyst`, `retro-applier` and `retro-checker`, launched with the Agent tool, in the background. Never use general-purpose, claude or fork as a stand-in. If an agent type is missing, it was probably installed after this session started (agents load at session start). Stop, release the lock, and tell the human to start a new session and run the same command.
+**Agents:** `retro-scout`, `retro-analyst`, `retro-applier` and `retro-checker`, launched with the Agent tool, in the background. Never use general-purpose, claude or fork as a stand-in. A newly installed agent can take a few minutes to appear in a running session. If one is missing, wait about a minute and try once more. If it's still missing, stop, release the lock, and tell the human to run the same command again shortly or in a new session.
 
 ## 0. Lock and set up
 
-1. **Run id:** `<target>-<YYYY-MM-DD>`, plus `-replay` in replay mode, plus `-2`, `-3` if the folder already exists. Run folder: `RSI/runs/<run>/`, holding `findings/` and `checks/`.
+1. **Run id:** `<target>-<YYYY-MM-DD>`, plus `-replay` in replay mode, plus `-2`, `-3` if the folder already exists. Run folder: `RSI/runs/<run>/` (or `--run-dir`), holding `findings/`, `checks/` and `tmp/`.
 2. **Lock:** `RSI/runs/<target>.lock` holds the session id and start time.
    - If the lock exists and is under 3 hours old, another retro is on this target. Run `ListAgents`. If a live session matches, message it with SendMessage and stop.
    - Otherwise take the lock. Remove it at the end, and also if you stop early.
@@ -36,6 +37,7 @@ Launch one `retro-scout`. Give it:
 When it finishes, read the headline block of `metrics.md` and the table in `sessions.md`.
 
 - If "Uncertain" lists sessions, ask the human about them in one AskUserQuestion. This is the only allowed extra question. It is multi-select: "which of these belong to <target>?"
+- `post-release` sessions (work after the target shipped) are listed in the final note and analyzed only if the human asks.
 - With `--stage scout`, report the headline and the session table here, release the lock and stop.
 
 ## 2. Analyze
@@ -50,7 +52,9 @@ Launch a `retro-analyst` per lens. Run **at most 4 at once**: launch the first 4
 - the run folder;
 - the notes file;
 - the repo and its rule files (in replay mode, the replay copy);
-- the output file `findings/<lens>.md`, or `findings/hotspot-<subject>.md`.
+- the output file `findings/<lens>.md`, or `findings/hotspot-<subject>.md`;
+- its own helper folder `tmp/<lens>/`, because analysts share `tmp/`;
+- in replay mode, the replay exclusions (see "Replay mode").
 
 ## 3. Synthesize → `report.md`
 
@@ -100,16 +104,18 @@ Print the report's "What went wrong" section and the change sets just before ask
 ## 5. Apply
 
 1. Write the approved sets, and the approved `needs OK` items inside them, at the end of `report.md` under `## Approved`.
-2. Launch one `retro-applier` per approved set, **all in ONE message**, in the background. Each prompt gives:
+2. **Baseline tests:** run the test command once, before any change. List its failures in `applied.md` as the baseline.
+3. Launch one `retro-applier` per approved set, **all in ONE message**, in the background. Each prompt gives:
    - the run folder and set id;
-   - the repo and the files it owns;
-   - the test command and forbidden actions from the notes;
+   - the repo and the files it owns, plus which files the other sets own;
+   - the test command, the baseline failures and the forbidden actions from the notes;
    - the commit co-author line from your attribution instructions.
-3. When they're all done, **apply the `.claude/` changes yourself.** Collect them from the appliers' reports and from sets marked "main agent applies":
+4. **Cross-file requests:** appliers write the text they need in another set's files into their reports. When all of them are done, apply that text yourself, run the tests and commit (`Retro <run>: cross-set text`), before stage 6.
+5. **Apply the `.claude/` changes yourself.** Collect them from the appliers' reports and from sets marked "main agent applies":
    - Edit the live files under `.claude/`. Claude Code asks the human before each edit there, and that check is intended.
    - Then sync the git copy with the project's sync command (in the notes). If the project has none, `cp` the live file onto its copy and confirm with `diff`.
    - Commit the copy.
-4. Write `applied.md`: each set's commit hash, its files, and what was skipped.
+6. Write `applied.md`: each set's commit hash, its files, and what was skipped.
 
 ## 6. Verify
 
@@ -118,11 +124,12 @@ Print the report's "What went wrong" section and the change sets just before ask
    - the `.claude/` skill and agent files the project uses;
    - the commit range: the HEAD from before stage 5, through HEAD.
 2. Apply their fixes yourself in one round, in the same files. Skip any fix that would undo an approved change, and note it. Run the tests, then commit (`Retro <run>: checker fixes`).
-3. **Enforceability:** confirm the checkers found no rule without a check. If they did, fix it in that same round.
-4. **Smoke test:** for each `.claude/` agent, skill or hook that was added or changed:
+3. **Re-check:** launch one more `retro-checker` (`checks/checker-3.md`) with both reports. It confirms every issue is fixed and that the fixes added no new one. Pass = 0 contradictions; fix anything it finds the same way.
+4. **Enforceability:** confirm the checkers found no rule without a check. If they did, fix it in that same round.
+5. **Smoke test:** for each `.claude/` agent, skill or hook that was added or changed:
    - Confirm the file's frontmatter parses: name, description, tools, model.
-   - Confirm it appears in your available agents or skills. Skills reload during a session. **Agents load only when a session starts**, so a new or changed agent can't be launched until the next session.
-   - Run a changed agent that is already loaded once, on a task with no side effects, such as a dry run or a read-only check of one item. For a new agent, or when no safe task exists, add the exact test prompt to "Waiting on you".
+   - Confirm it appears in your available agents or skills. Skills reload at once; a new agent can take a few minutes, so retry once after a minute.
+   - Run it once on a task with no side effects, such as a dry run or a read-only check of one item. If it hasn't appeared yet, or no safe task exists, add the exact test prompt to "Waiting on you".
 
 ## 7. Report and ledger
 
@@ -148,8 +155,12 @@ Print the report's "What went wrong" section and the change sets just before ask
 Replay mode tests the pipeline against a project whose answers are already known:
 1. Clone the project's repo into `<run folder>/repo` and check out `<commit>` (`git clone -q <repo> <run folder>/repo && git -C <run folder>/repo checkout -q <commit>`). Analysts and appliers work in that copy, and the live project is never touched.
 2. Don't touch live `.claude/` files. Write the `.claude/` changes into `<run folder>/claude-changes.md`.
-3. Don't ask the approval question. Apply every set that isn't `needs OK`, and say so in the final note.
-4. Then score the run against the eval file the notes name (`RSI/evals/…`): write `<run folder>/score.md`, with each expected item marked hit or missed.
+3. **Replay exclusions**, given to every analyst, applier and checker. The live state already holds the answers the replay must find on its own, so:
+   - read only the build sessions in `sessions.md`, never retro sessions or this session;
+   - read the rule files in the copy, never the live ones;
+   - skip files committed after `<commit>`, the live `.claude/` files, and the user's memory.
+4. Don't ask the approval question. Apply every set that isn't `needs OK`, and say so in the final note.
+5. Then score the run against the eval file the notes name (`RSI/evals/…`): write `<run folder>/score.md`, with each expected item marked hit or missed.
 
 ## Other log sources
 

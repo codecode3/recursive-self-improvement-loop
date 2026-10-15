@@ -13,8 +13,10 @@ The expected answers come from the manual retro of 2026-10-14: sessions `7fea9bc
 2. Side sessions found: `4ba9f639` (Juno hair), `e078b0ec` (Hydra), `d6e38151` (render viewing).
 3. `4d1a7a68` marked mention-only (AutoJob, Slop added to the resume).
 4. Today's retro sessions (`7fea9bc0`, `e2c48038`, `d39afac5` thumbnail notes, and the launching session) are **not** treated as build sessions.
-5. Prompts: **112** in total: be559bb6 **76**, 4ba9f639 **18**, e078b0ec **12**, d6e38151 **6**.
-   - The manual count on 2026-10-14 said 111 (75 in the main session). It left out the pasted-only prompt at 3:04 pm, the "Story and structure 201…" backlog paste. The scout's rule counts pasted-only prompts, so 112 is the expected number.
+5. Prompts: **112 typed + 13 queued = 125**.
+   - Typed: be559bb6 **76**, 4ba9f639 **18**, e078b0ec **12**, d6e38151 **6**.
+   - Queued (`queued_command` attachments, typed while the agent worked): be559bb6 **5**, 4ba9f639 **8**.
+   - The manual count on 2026-10-14 said 111 (75 in the main session). It left out the pasted-only prompt at 3:04 pm, the "Story and structure 201…" backlog paste, and every queued prompt.
    - ±1 is a hit if the scout explains the difference.
 6. Wall time **10 h 28 m**: first prompt 11:37 am ("find the music video project"), last prompt 10:05 pm ("open the crop saved one").
 7. Hotspots include **Juno** (appearance, hair, mic grip). The Hydra or the lyrics are acceptable second and third hotspots.
@@ -56,3 +58,4 @@ With no ledger entry for the earlier videos, the `followup` lens rebuilds the le
 
 | Date | Run | M1 | M2 | M3 | M4 | Notes |
 |---|---|---|---|---|---|---|
+| 2026-10-14 | slop-2026-10-14-replay (virtual, run folder in the session scratchpad) | 8/8 | 10/10 | pass | 5/5 | About 32 min with 0 human prompts: 1 scout, 9 analysts, 3 appliers, 3 checkers, all on Opus 5.5 except the checkers, which use Sonnet 5.5. 8 commits in the copy only; 0 forbidden commands; live files unchanged. The scout counted 112 typed prompts and missed the 13 queued ones; the rule is fixed since. The run also found 10 problems in the pipeline itself (queued prompts, shared `tmp/` collisions, agents doubting the clock, agent loading, the follow-up window, replay exclusions, a post-release kind, baseline tests, cross-file requests, `--run-dir`), all fixed in the same session. |

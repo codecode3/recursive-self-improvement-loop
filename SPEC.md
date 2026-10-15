@@ -4,7 +4,7 @@
 
 **No scripts.** Agents do every stage by inference. They read the transcripts with ordinary shell commands and one-off parsing, the way the manual Slop retro did. The project is made of prompts only: one skill, four agents and the lens prompts.
 
-Status: M1–M5 built on 2026-10-14 (the skill, 4 agents, 7 lenses, target notes, the Slop eval). Results are in `evals/slop-replay.md`. Times are Central.
+Status: M1–M5 built on 2026-10-14 (the skill, 4 agents, 7 lenses, target notes, the Slop eval). The Slop replay passed M1–M4 the same day, and its 10 pipeline fixes are applied. Results are in `evals/slop-replay.md`. Times are Central.
 
 ---
 
@@ -107,7 +107,7 @@ The scout asks a question only when it can't tell whether a session belongs.
 - It excludes tool results, `isMeta` lines, compaction summaries, slash commands and their output, `<task-notification>`, `[Request interrupted…`, and system reminders.
 - Pasted text counts as a prompt and is marked as pasted.
 
-On Slop this rule gives 112 prompts. The manual count said 111 because it dropped one pasted-only prompt. The scout reports:
+Queued prompts (typed while the agent works, stored as `queued_command` attachments) count too and are marked as queued. On Slop this rule gives 112 typed prompts plus 13 queued, 125 in all. The manual count said 111 because it dropped one pasted-only prompt and every queued one. The scout reports:
 - prompts per session and in total;
 - wall time from first to last prompt;
 - time the human waited versus time the agent worked;
@@ -251,7 +251,7 @@ Slop is the replay benchmark, because the manual run gives the expected answers.
 
 | Milestone | Builds | Accepted when |
 |---|---|---|
-| **M1** Scout | `retro` skill (stages 0–1), `retro-scout` agent, `evals/slop-replay.md` | On Slop, the scout finds `be559bb6` (+28 subagents), `4ba9f639`, `e078b0ec` and `d6e38151`; marks `4d1a7a68` as mention-only and today's retro sessions as retro; counts **112 prompts (76 / 18 / 12 / 6)**, **10 h 28 m**, **28 subagents**; names Juno as a hotspot. (The manual count said 111. It left out one pasted-only prompt.) |
+| **M1** Scout | `retro` skill (stages 0–1), `retro-scout` agent, `evals/slop-replay.md` | On Slop, the scout finds `be559bb6` (+28 subagents), `4ba9f639`, `e078b0ec` and `d6e38151`; marks `4d1a7a68` as mention-only and today's retro sessions as retro; counts **112 typed prompts (76 / 18 / 12 / 6) plus 13 queued = 125**, **10 h 28 m**, **28 subagents**; names Juno as a hotspot. (The manual count said 111. It left out one pasted-only prompt and the queued ones.) |
 | **M2** Analysis | the lens prompts, `retro-analyst`, the synthesis section of the skill | The Slop report contains ≥ 8 of the 10 reference findings below, each with a quote and a time. |
 | **M3** Apply + verify | approval step, `retro-applier`, `retro-checker`, ledger | On a scratch copy of `music-videos`: commits land, tests pass, no contradictions remain, and no applier transcript contains a side-effect command. |
 | **M4** Recursion | `followup` lens, escalation | Replaying Hello Tomorrow → Slop shows which Hello Tomorrow-era rules were ignored on Slop. |

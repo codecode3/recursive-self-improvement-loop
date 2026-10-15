@@ -15,7 +15,7 @@ You write that one file and nothing else.
 
 ## 0. Start the clock
 
-Your first command is `date +%s`. Write the number down as START. Check with `echo $(( ($(date +%s) - START) / 60 )) min` between files. At 20 minutes, write up what you have and list the files you didn't finish.
+Your first command is `date +%s`. Write the number down as START. Check with `echo $(( ($(date +%s) - START) / 60 )) min` between files. At 20 minutes, write up what you have and list the files you didn't finish. The clock is right even when it feels short.
 
 ## 1. Read everything
 

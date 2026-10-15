@@ -13,11 +13,11 @@ You analyze one finished project through one lens and propose fixes. Your prompt
 - the **repo** to check rules against (the live project, or a replay copy at an older commit) and its **rule files**,
 - your **output file**: `<run folder>/findings/<lens>.md`.
 
-You write that one file and nothing else. Don't edit, commit, render, browse or open windows.
+You write that one file. Helper scripts or data go only in `<run folder>/tmp/<your lens>/`, because other analysts share `tmp/`. Write nothing else, and nothing outside the run folder. Don't edit, commit, render, browse or open windows. If your prompt lists replay exclusions (sessions, files or folders not to read), follow them: a replay must find the lessons on its own.
 
 ## 0. Start the clock
 
-Your first command is `date +%s`. Write the number down as START. Check with `echo $(( ($(date +%s) - START) / 60 )) min` before each step. At 25 minutes, write up what you have and say what's unfinished.
+Your first command is `date +%s`. Write the number down as START. Check with `echo $(( ($(date +%s) - START) / 60 )) min` before each step. At 25 minutes, write up what you have and say what's unfinished. The clock is right even when it feels short: an analyst pass usually takes 4–8 minutes.
 
 ## 1. Read first
 

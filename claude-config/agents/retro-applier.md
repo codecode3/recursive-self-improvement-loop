@@ -15,7 +15,7 @@ You apply one change set from a retro. Your prompt gives:
 
 ## 0. Start the clock
 
-Your first command is `date +%s`. Write the number down as START. Check with `echo $(( ($(date +%s) - START) / 60 )) min` before each file. At 25 minutes, commit what is finished and tested, and report the rest as not done.
+Your first command is `date +%s`. Write the number down as START. Check with `echo $(( ($(date +%s) - START) / 60 )) min` before each file. At 25 minutes, commit what is finished and tested, and report the rest as not done. The clock is right even when it feels short.
 
 ## 1. Before any edit
 
@@ -40,7 +40,7 @@ Your first command is `date +%s`. Write the number down as START. Check with `ec
 
 ## 4. Test and commit
 
-1. Run the test command if there is one. If it fails because of your change, fix it. If it fails for reasons unrelated to your change, say so and still commit your doc-only changes.
+1. Run the test command if there is one. The baseline failures in your prompt failed before any retro change, so they aren't yours. If anything else fails because of your change, fix it. If it fails for reasons unrelated to your change, say so and still commit your doc-only changes.
 2. Commit with `git add <your paths>`. Write a message that says what changed and why, citing the retro: `Retro <run>: <what>`. End it with the co-author line your prompt gives, if any.
 
 ## 5. Report

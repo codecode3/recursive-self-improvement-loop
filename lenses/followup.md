@@ -6,8 +6,8 @@
 
 1. **From the ledger.** Read `RSI-session-retro/ledger.md`. Take every entry in this target's family that is older than this project's first session. Each accepted proposal listed there is a lesson to check.
 2. **If no ledger entry exists yet**, rebuild the lessons from git:
-   - In the repo you were given, list the commits to the rule files between the previous project's last session and this project's first session: `git log --after=<a> --before=<b> --format='%h %aI %s' -- <rule files>`. Take the times from the target notes, or from `sessions.md`.
-   - Each rule those commits added or changed is a lesson to check. If the window is empty, use the rule files' whole history up to this project's start.
+   - Take every rule in the rule files as they stood just before this project's first session: `git log --before=<first session, ISO> -1 --format=%h`, then `git show <hash>:<file>`. A family's rules are all lessons from its earlier projects, so use the whole history, not just the commits since the previous project.
+   - Group the lessons by the commit and date that added them (`git log --format='%h %aI %s' -- <rule files>`), so the table shows which project each came from.
    - Say clearly in the summary that the lessons were rebuilt from git, not from a ledger.
 
 ## Check each lesson

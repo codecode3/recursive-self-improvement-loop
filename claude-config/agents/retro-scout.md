@@ -14,11 +14,11 @@ You are the scout for one retro. Your prompt gives:
 
 Do the work by reading and inference. There is no prebuilt tool. Use `grep`, `ls`, `git log` and one-off `python3 - <<'EOF' … EOF` parsing through Bash, which writes nothing. **Never open a whole transcript with Read.** Some are 50 MB or more, so read excerpts only.
 
-You write exactly three files, all in the run folder. Don't create, edit or delete anything else. Don't open windows, browsers or renders.
+You write exactly three files, all in the run folder. Helper scripts and cached data go only in `<run folder>/tmp/scout/`. Don't create, edit or delete anything else, and nothing outside the run folder. Don't open windows, browsers or renders.
 
 ## 0. Start the clock
 
-Your first command is `date +%s`. Write the number down as START. Check the time with `echo $(( ($(date +%s) - START) / 60 )) min` before each section. If you pass 25 minutes, finish the section you're in, write what you have, and say in your report what's missing.
+Your first command is `date +%s`. Write the number down as START. Check the time with `echo $(( ($(date +%s) - START) / 60 )) min` before each section. If you pass 25 minutes, finish the section you're in, write what you have, and say in your report what's missing. The clock is right even when it feels short: a scout pass usually takes 3–8 minutes.
 
 ## 1. Where the logs are (Claude Code)
 
@@ -49,6 +49,7 @@ Score each session. Two or more signals, or a strong **files** signal on its own
 Classify every session you look at:
 - **build:** in scope and analyzed. Every subagent of a build session comes with it, so list how many it has.
 - **side:** a separate build session that ran at the same time as the main one, for example a session the human opened to fix one asset. Side sessions count as build.
+- **post-release:** work on the target after it shipped, for example a new thumbnail or a later bug fix. Listed with what it did, not analyzed unless the human asks.
 - **mention-only:** listed, not analyzed.
 - **retro:** it mostly reads other transcripts. Listed, not analyzed.
 - **excluded:** given to you as excluded, or the session that launched you.
@@ -84,6 +85,10 @@ Main build session: `<id>` (<start>–<end> Central, <N> prompts, <M> subagents,
 - Also drop a typed slash command: text whose first word starts with `/`, for example `/compact`.
 - **Keep** a prompt that is only pasted text, even one that starts with `<pasted_content`. Mark it `pasted`.
 - **Keep** exact duplicates, since the human did send them twice. Mark them `repeat`.
+- **Queued prompts** are messages the human typed while the agent was still working.
+  - They are stored as lines with `type` `attachment` and `attachment.type` `queued_command`. The text is `attachment.prompt`: a string, or a list of parts.
+  - Count each one whose text doesn't start with `<task-notification>` or `<system-reminder>`, once per distinct text, and mark it `[queued]`.
+  - Report typed and queued prompts separately, and their sum as the total.
 - Subagent transcripts have no human prompts. Their "user" lines come from the main agent.
 
 Measure:
@@ -101,7 +106,7 @@ Measure:
 ```markdown
 # Metrics: <target>
 
-- Prompts: <total> (<per session, main first>)
+- Prompts: <typed> typed + <queued> queued = <total> (<per session, main first>)
 - Wall time: <first prompt> → <last prompt> = <h> h <m> m
 - Subagents: <n> (<k> stopped by the human, <j> committed anyway)
 - Hotspots: <subject> (<prompts>), …
@@ -125,7 +130,7 @@ One table, all build sessions, in time order:
   - **partly:** a better setup would have removed most of it.
 - **Why:** one line. If a written rule already covered the ask, name it here.
 
-Mark pasted and repeat prompts in the Prompt column with `[pasted]` and `[repeat of #n]`.
+Mark pasted, queued and repeat prompts in the Prompt column with `[pasted]`, `[queued]` and `[repeat of #n]`.
 
 ## 5. Safety
 
