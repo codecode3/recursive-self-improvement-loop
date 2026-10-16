@@ -6,7 +6,8 @@
   - hello tomorrow, hello-tomorrow;
   - frutiger aero realm, frutiger;
   - не робей, ne robei, ne-robei;
-  - slop, called it slop, juno.
+  - slop, called it slop, juno;
+  - captcha, ghost.
 - **Projects in order** (for the `followup` lens):
 
   | Video | Folder | Finished |
@@ -15,6 +16,7 @@
   | Frutiger Aero Realm | `videos/frutiger-aero-realm/` | 2026-10-10 |
   | Не робей | `videos/ne-robei/` | 2026-10-11 |
   | Slop | `videos/slop/` | 2026-10-11 |
+  | Captcha ("Ghost") | `videos/captcha/` | not finished |
 
   All are under `~/antigravity-projects/music-videos/`.
 
