@@ -26,6 +26,7 @@ Format: `- [<run>] <item>, asked <date>; status open | closed <date>: <answer>`
 - [slop replay, 5c14025c] The music-videos guide fixes the Slop replay found and the live guides still lack, proposed 2026-10-14 21:38 and never answered: the CLAUDE.md standing list, a setup-form split field, a known-bugs section plus a `Rendered:` line, an 8/10 stopping bar, a take-switch impact table, a BrowserOS fallback, optional `lint_geometry.py`, compaction re-inject and backlog Stop hooks; needs OK: a hero sign-off stop (memory `rsi-session-retro.md`, "Still missing, proposed to the user and NOT applied"), asked 2026-10-14; status open.
 - [captcha-2026-10-15] Ban `fork` as a missing-agent fallback workspace-wide and in the music-video guides (HANDOFF "Open" 1), asked 2026-10-15; status closed 2026-10-18: not banned outside the retro skill (which already bans it for retro agents, `SKILL.md` "Agents"). R10's wait-a-turn retry makes the fallback rare, and the user left the call to the main agent.
 - [autojob-2026-10-18] Sets A, B, C and N1–N4 from `runs/autojob-2026-10-18/report.md`, asked 2026-10-18; status open. Resume: `/retro autojob --resume autojob-2026-10-18`.
+- [RSI-session-retro-2026-10-18] Confirm the clause added inside the approved N2 (workspace AGENTS.md "Rule edits get one independent check": "plus the before/after text of any edited file outside git (this AGENTS.md, memory)"), asked 2026-10-18; status open.
 
 ## captcha-2026-10-15 (music-video)
 - Status: done
@@ -55,3 +56,28 @@ Format: `- [<run>] <item>, asked <date>; status open | closed <date>: <answer>`
   - "Build while you wait" (Slop) backfired → story assets wait for the lyrics OK (R8)
 - Pipeline: a scratchpad `--run-dir` disappears with the session, so live runs use `runs/`; appliers wrote cross-set text ahead of time; screen checker fixes against standing rules (the fork ban); they/them for the user. Added 2026-10-18 from `runs/captcha-2026-10-15/HANDOFF.md`; not applied until RSI-session-retro-2026-10-18. The fork-ban question is closed (see Open decisions).
 - Checks: checker-1, checker-2, then checker-3 re-check with 0 contradictions (fix mv@030c30f); per-checker counts not recorded
+
+## RSI-session-retro-2026-10-18 (retro-pipeline)
+- Status: done
+- Target: the retro pipeline itself (`RSI-session-retro/`, live `.claude/skills/retro` + 4 `retro-*` agents): precursors 10-14 (`7fea9bc0`, `e2c48038`), build 10-14 (`5c14025c`), runs captcha-2026-10-15 (`1e3fd6b9`), captcha-2026-10-17 scout-only (`122d9fba`), autojob-2026-10-18 read-only (`c8afdfcf`)
+- Numbers: 74 prompts (66 typed + 8 queued; +19 machine-queued lines dropped), 93 h 55 m calendar (active 4 h 1 m + 56 m + 4 m + 38 m), 57 subagents; 8 lenses; projected build + runs 21 → ~13 (11–15), a full run 4 → 2 (start + approval)
+- Accepted (all of A, B, C and N1–N3; the user left the choice to the main agent, "It is up to you to decide these."):
+  - A (R1 read-only mode, R2 status + resume, R3 ledger records + Open decisions, R4 RSI triggers, R5 goal-led runs): predicted ~5 prompts over the next 3 runs, all retro sessions; RSI@72f812c, skill via RSI@565d915
+  - B (R6 report check before the question, R7 outside facts sourced, R8 checker rigor): predicted ~4 prompts ("double-check" asks) over the next 3 runs; skill + agents via RSI@565d915
+  - C (R9 scout queued rule, R10 agents load without a new session, R11 pipeline target notes + drift check, R12 eval honesty, correctness): predicted ~4 prompts + 1 correctness fix; RSI@62a24ce, 2f42403, 3f575d0, 0d1880f
+  - N1 (needs OK, decided yes): AGENTS.md RSI routing bullet; antigravity-projects/AGENTS.md (not a git repo)
+  - N2 (needs OK, decided yes): AGENTS.md "Rule edits get one independent check"; same file
+  - N3 (needs OK, decided yes): retro agents follow the memory model/effort (opus 5.5 high), checkers included; skill "Agents" paragraph
+  - N4 (fork ban): closed, not banned outside the retro skill (see Open decisions)
+  - Cross-set text RSI@340eebc; checker fixes RSI@93ff804; re-check fixes RSI@474cbcb, RSI@6344e60
+- Escalated (failed again):
+  - "Double-check your work" (asked 3× in 5c14025c, 3 passes in 7fea9bc0) → report-mode checker before the question, re-check pass = 0 open issues (R6, R8), AGENTS.md independent check (N2)
+  - one-shot delivery memory ignored in the build ("what next?" / "do it" 5×) → not fixed by a rule this run; tracked by eval R2
+  - "find the RSI project" before the start prompt (2 runs) → skill triggers + AGENTS.md routing (R4, N1)
+- Pipeline:
+  - The scout's `Rule deviations:` (smoke test): its category list has no plain `repeat`, only `repeat correction`; not fixed this run.
+  - The report check caught 3 wrong claims (the projection and two citations) before the question; keep it.
+  - The checkers found 38 issues in a self-edit, the re-check 7 more (4 contradictions), and the 4th checker 6 more, all introduced by the previous fix round. Most came from the same rule written in SKILL, SPEC, README, target notes and ledger.md; prefer one source and pointers.
+  - This run edited the live skill and agents it was running on (the tool was also the target). The user asked on 2026-10-18 for a rule: a retro of the pipeline edits `claude-config/` only and promotes to live `.claude/` after the checks and a replay. Added after this run (see its own commit).
+- Agents (from transcripts): stages 1–3 ran on the frontmatter, before N3 extended the memory setting to retro agents: scout opus-5-5/medium ×1, analysts opus-5-5/medium ×8, report checker sonnet-5-5/medium ×1. From stage 5: appliers opus-5-5/high ×2, checkers opus-5-5/high ×4, smoke tests (scout, analyst, applier) opus-5-5/high ×3
+- Checks: report check 3 wrong, fixed (open 0); checker-1 18 found, 18 fixed (2 memory items in stage 7); checker-2 20 found, 20 fixed; checker-3 re-check 7 open, 7 fixed in 474cbcb; checker-4 (2nd re-check) 6 open, 6 fixed in 6344e60, confirmed by grep in `checks/fixes.md` (no fifth checker by rule; `Stage 6 passed`)
