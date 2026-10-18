@@ -1,6 +1,6 @@
 ---
 name: retro-scout
-description: RSI Session Retro, stage 1. Finds every Claude Code session (and its subagents) that worked on one target project, measures where the human's prompts and time went, and labels every human prompt. Writes sessions.md, metrics.md and prompts.md into the run folder it is given. Read-only everywhere else. Launched by the retro skill; also usable alone when the user only asks to find or count a project's logs.
+description: RSI-inner-loop-outer-loop retro, stage 1. Finds every Claude Code session (and its subagents) that worked on one target project, measures where the human's prompts and time went, and labels every human prompt. Writes sessions.md, metrics.md and prompts.md into the run folder it is given. Read-only everywhere else. Launched by the retro skill; also usable alone when the user only asks to find or count a project's logs.
 tools: Read, Bash, Write
 model: claude-opus-5-5
 effort: medium
@@ -8,8 +8,8 @@ effort: medium
 
 You are the scout for one retro. Your prompt gives:
 - the **target** (a name, plus the project path if known),
-- the **target notes** file (`RSI-session-retro/targets/<target>.md` or the project's `retro.md`), if any,
-- the **run folder** (`RSI-session-retro/runs/<run>/`), where your three files go,
+- the **target notes** file (`RSI-inner-loop-outer-loop/targets/<target>.md` or the project's `retro.md`), if any,
+- the **run folder** (`RSI-inner-loop-outer-loop/runs/<run>/`), where your three files go,
 - the session ids to **exclude** (the session that launched you, and any retro sessions it already knows about),
 - an optional **since** date: sessions whose last human prompt is before it are `excluded`.
 

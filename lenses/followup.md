@@ -4,9 +4,9 @@
 
 ## Find the earlier lessons
 
-1. **From the ledger.** Read `RSI-session-retro/ledger.md`. Take every entry in this target's family that is older than this project's first session. Each accepted proposal listed there is a lesson to check.
-   - **Proposed, not applied.** Also read every `RSI-session-retro/runs/*/ledger-entry.md` whose first lines say `Status: proposed, not applied` (`grep -l "Status: proposed, not applied" RSI-session-retro/runs/*/ledger-entry.md`). Those lessons are not in force yet. Report whether the problem came back anyway: that is evidence for approving them.
-   - **Pipeline lessons.** Take every `- Pipeline:` item from entries in any family, not just this one, and check it against every retro run since that entry: their folders in `RSI-session-retro/runs/` (`metrics.md`, `report.md`, `applied.md`, `checks/`). Give them their own "Pipeline lessons" table.
+1. **From the ledger.** Read `RSI-inner-loop-outer-loop/ledger.md`. Take every entry in this target's family that is older than this project's first session. Each accepted proposal listed there is a lesson to check.
+   - **Proposed, not applied.** Also read every `RSI-inner-loop-outer-loop/runs/*/ledger-entry.md` whose first lines say `Status: proposed, not applied` (`grep -l "Status: proposed, not applied" RSI-inner-loop-outer-loop/runs/*/ledger-entry.md`). Those lessons are not in force yet. Report whether the problem came back anyway: that is evidence for approving them.
+   - **Pipeline lessons.** Take every `- Pipeline:` item from entries in any family, not just this one, and check it against every retro run since that entry: their folders in `RSI-inner-loop-outer-loop/runs/` (`metrics.md`, `report.md`, `applied.md`, `checks/`). Give them their own "Pipeline lessons" table.
    - **Open decisions.** Read `## Open decisions` in `ledger.md`. Any item still open across 2 or more runs is a finding: quote it with its run and date, and propose it for this run's approval question as `needs OK`.
 2. **If no ledger entry exists yet**, rebuild the lessons from git:
    - Take every rule in the rule files as they stood just before this project's first session: `git log --before=<first session, ISO> -1 --format=%h`, then `git show <hash>:<file>`. A family's rules are all lessons from its earlier projects, so use the whole history, not just the commits since the previous project.

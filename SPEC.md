@@ -1,4 +1,4 @@
-# RSI Session Retro: spec
+# RSI-inner-loop-outer-loop: spec
 
 **What it does:** after a project ships, one command reads every Claude Code session that built it, subagents included. It finds where the human spent prompts and patience, proposes fixes and applies the ones the human approves. It also records what it predicted, so the next retro can check whether those fixes worked. The process runs on any project, not just music videos.
 
@@ -222,7 +222,7 @@ Rule hygiene: the synthesizer has a rule budget per guide. A retro that adds rul
 ## 7. Components
 
 ```
-RSI-session-retro/
+RSI-inner-loop-outer-loop/
   SPEC.md, README.md
   lenses/*.md              one prompt per lens
   targets/<family>.md      per-project notes (aliases, repos, rule files, tests, forbidden actions)

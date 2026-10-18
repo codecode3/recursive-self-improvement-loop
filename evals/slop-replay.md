@@ -61,7 +61,7 @@ With no ledger entry for the earlier videos, the `followup` lens rebuilds the le
 
 ## R: regressions in the pipeline's own sessions (each item is a hit or a miss)
 
-Scored at each meta-retro (`/retro RSI-session-retro`) from its scout's `prompts.md` table, not from the Slop replay itself.
+Scored at each meta-retro (`/retro RSI-inner-loop-outer-loop`) from its scout's `prompts.md` table, not from the Slop replay itself.
 
 1. An automated run has 0 status-check / "spawn N" / "anything else" / "summarize" prompts.
 2. A pipeline build or extension session needs ≤ 2 go-ahead prompts ("what next?", "do it", "go ahead and build…").

@@ -3,13 +3,13 @@
 - **Family:** retro-pipeline.
 - **Self-target: yes.** A run on this target edits the `claude-config/` copies only and promotes them to live `.claude/` after stage 6 (the skill's "Self-target mode").
 - **Aliases** (a target named any of these uses this file):
-  - rsi, RSI project, RSI-session-retro;
+  - rsi, RSI project, RSI-inner-loop-outer-loop, RSI-session-retro (the old name);
   - retro, retro pipeline.
 - **Projects in order** (for the `followup` lens): one project. Earlier lessons are the `ledger.md` entries with a `Pipeline:` line from every family, plus `## Open decisions`.
 
 ## Repos
 
-- **Rules repo:** `~/antigravity-projects/RSI-session-retro`, a git repo on main. `runs/` is gitignored.
+- **Rules repo:** `~/antigravity-projects/RSI-inner-loop-outer-loop`, a git repo on main. `runs/` is gitignored.
 - **Session logs:** `~/.claude/projects/-Users-me-antigravity-projects/`. For this target, retro-run sessions ARE the target, so don't exclude them. Exclude only the launching session.
 
 ## Session kinds
@@ -29,8 +29,8 @@ For the scout's `Prompts per milestone:` line, one set per retro run: stages 1�
 - **Claude Code** (live, guarded) under `~/antigravity-projects/.claude/`:
   - `skills/retro/SKILL.md`;
   - `agents/retro-scout.md`, `agents/retro-analyst.md`, `agents/retro-applier.md`, `agents/retro-checker.md`.
-- **The 5 live↔copy pairs:** each live file `.claude/<f>` has a git copy `RSI-session-retro/claude-config/<f>`, for the 5 files above. Never edit the copies, except in a run on this target (Self-target above).
-- **`.claude/` sync:** after editing a live file, from `~/antigravity-projects` run `cp .claude/<f> RSI-session-retro/claude-config/<f>`, then the check below, then commit only the copy paths.
+- **The 5 live↔copy pairs:** each live file `.claude/<f>` has a git copy `RSI-inner-loop-outer-loop/claude-config/<f>`, for the 5 files above. Never edit the copies, except in a run on this target (Self-target above).
+- **`.claude/` sync:** after editing a live file, from `~/antigravity-projects` run `cp .claude/<f> RSI-inner-loop-outer-loop/claude-config/<f>`, then the check below, then commit only the copy paths.
 - **User memory:** `~/.claude/projects/-Users-me-antigravity-projects/memory/MEMORY.md` and the files it links, for example `rsi-session-retro.md`, `subagent-model-effort.md` and `one-shot-delivery.md`.
 
 ## Quality domain
@@ -42,7 +42,7 @@ Correct counts (prompts, time, subagents), checked citations and claims, eval ho
 This is a prompt-only project with no test suite. The frontmatter parse and the sync check are the test. Paste it as one command:
 
 ```bash
-cd ~/antigravity-projects && fail=0; for f in skills/retro/SKILL.md agents/retro-{scout,analyst,applier,checker}.md; do for p in .claude/$f RSI-session-retro/claude-config/$f; do python3 -I -c 'import sys,re; t=open(sys.argv[1]).read(); m=re.match(r"^---\n(.*?)\n---\n",t,re.S); k={l.split(":",1)[0] for l in (m.group(1).splitlines() if m else []) if ":" in l and not l.startswith(" ")}; need={"name","description"}|({"tools","model"} if "/agents/" in sys.argv[1] else set()); miss=need-k; miss and print("BAD FRONTMATTER",sorted(miss),sys.argv[1]); sys.exit(1 if miss else 0)' $p || fail=1; done; diff -q .claude/$f RSI-session-retro/claude-config/$f >/dev/null || { echo STALE $f; fail=1; }; done; [ $fail = 0 ] && echo "OK: 5 files parse, live == copy"
+cd ~/antigravity-projects && fail=0; for f in skills/retro/SKILL.md agents/retro-{scout,analyst,applier,checker}.md; do for p in .claude/$f RSI-inner-loop-outer-loop/claude-config/$f; do python3 -I -c 'import sys,re; t=open(sys.argv[1]).read(); m=re.match(r"^---\n(.*?)\n---\n",t,re.S); k={l.split(":",1)[0] for l in (m.group(1).splitlines() if m else []) if ":" in l and not l.startswith(" ")}; need={"name","description"}|({"tools","model"} if "/agents/" in sys.argv[1] else set()); miss=need-k; miss and print("BAD FRONTMATTER",sorted(miss),sys.argv[1]); sys.exit(1 if miss else 0)' $p || fail=1; done; diff -q .claude/$f RSI-inner-loop-outer-loop/claude-config/$f >/dev/null || { echo STALE $f; fail=1; }; done; [ $fail = 0 ] && echo "OK: 5 files parse, live == copy"
 ```
 
 It prints `OK: 5 files parse, live == copy` on a pass, and `STALE <file>` or `BAD FRONTMATTER` otherwise. The final note's Checks line takes its count from it: "`.claude/` copies: in sync (5)" or "STALE <files>".

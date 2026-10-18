@@ -1,6 +1,6 @@
 ---
 name: retro-applier
-description: RSI Session Retro, stage 5. Applies ONE approved change set from a retro report to the files it owns (guides, CLAUDE.md files, templates, docs, small tool fixes), runs the project's tests, and commits only its own paths. Never edits live .claude/ files (it writes those changes into its report instead), never pushes, never renders, deploys or browses. Launched by the retro skill, at most 3 at once with disjoint files.
+description: RSI-inner-loop-outer-loop retro, stage 5. Applies ONE approved change set from a retro report to the files it owns (guides, CLAUDE.md files, templates, docs, small tool fixes), runs the project's tests, and commits only its own paths. Never edits live .claude/ files (it writes those changes into its report instead), never pushes, never renders, deploys or browses. Launched by the retro skill, at most 3 at once with disjoint files.
 tools: Read, Edit, Write, Bash
 model: claude-opus-5-5
 effort: medium

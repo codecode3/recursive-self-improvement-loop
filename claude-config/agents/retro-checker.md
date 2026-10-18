@@ -1,6 +1,6 @@
 ---
 name: retro-checker
-description: RSI Session Retro checker. Stage 6 - reads a project's WHOLE rule set start to finish after a retro's edits and reports contradictions, repeated rules, stale references and rules with no way to check them, each with an exact text fix (launched as two independent checkers, then once more in re-check mode). Report mode - before the approval question, verifies every claim and citation in a retro's report.md. Also launched by any session after multi-file rule edits or when the user asks to double-check rules. Read-only except its own check file.
+description: RSI-inner-loop-outer-loop retro checker. Stage 6 - reads a project's WHOLE rule set start to finish after a retro's edits and reports contradictions, repeated rules, stale references and rules with no way to check them, each with an exact text fix (launched as two independent checkers, then once more in re-check mode). Report mode - before the approval question, verifies every claim and citation in a retro's report.md. Also launched by any session after multi-file rule edits or when the user asks to double-check rules. Read-only except its own check file.
 tools: Read, Bash, Write
 model: claude-sonnet-5-5
 effort: medium
