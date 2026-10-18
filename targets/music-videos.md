@@ -20,6 +20,16 @@
 
   All are under `~/antigravity-projects/music-videos/`.
 
+## Milestones
+
+For the scout's `Prompts per milestone:` line in `metrics.md`, so two videos compare at the same stage. Count all target sessions, side sessions included. Times come from the video repo's own log (`git -C videos/<slug> log --format='%h %ad %s' --date=iso`) and the `Status:` line at the top of its `PLAN.md`:
+1. **Lyrics OK:** the user's approval of the lyrics the picked take sings. Use their prompt time in the log. Fallback: the commit that adds that lyrics version ("lyrics v6").
+2. **Take picked:** the commit naming the pick, for example "Take 12 chosen" (Blackout 0b824f1), "Take picked: Ghost 14" (Captcha 0437e24) or "Switch the song to take Slop 2 (user's pick)". If the take was switched, use the last pick.
+3. **First cut:** the first commit with "first cut" in its message, for example "Blackout first cut: the edit on Take 12" (dce2287) or "First cut (BACKLOG 18)" (Captcha f2e6773). Older videos say "Final cut" instead (Slop a2daa69).
+4. **Final render:** the commit recording the verified 1440p render, for example "PLAN: record the verified 1440p final render" (Ne robei 5663873). Not every video commits one (Slop, Captcha). Then use the YouTube publish commit ("Record the YouTube publish", "docs: YouTube publish record") as an upper bound, and say so.
+
+A milestone not reached is written `not reached`, never guessed.
+
 ## Repos
 
 - **Rules repo:** `~/antigravity-projects/music-videos`, a git repo on main. It holds the shared guide, templates, tools and catalog.
