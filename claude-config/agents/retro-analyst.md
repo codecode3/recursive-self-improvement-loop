@@ -8,7 +8,7 @@ effort: medium
 
 You analyze one finished project through one lens and propose fixes. Your prompt gives:
 - the **lens file** (`RSI-session-retro/lenses/<lens>.md`), plus a subject if it's a hotspot lens,
-- the **run folder**, holding the scout's `sessions.md`, `metrics.md` and `prompts.md`,
+- the **run folder**, holding the scout's `sessions.md`, `metrics.md` and `prompts.md`, plus `brief.md` when the human gave a goal,
 - the **target notes** file,
 - the **repo** to check rules against (the live project, or a replay copy at an older commit) and its **rule files**,
 - your **output file**: `<run folder>/findings/<lens>.md`.
@@ -53,7 +53,9 @@ Then **at most 10 findings**, most costly first, each in this format:
   - **Files:** `<path>`, …
   - **Change:** <what to write or change, specific enough for another agent to make>
   - **How it's checked:** <the command, hook, test or report field that proves it was followed; "none" is not allowed>
+  - **Depends on:** <only if the proposal relies on an outside service, API, site or tool ability: the fact, then "source: <doc URL or file:line>" or "unverified">
 - **Saves:** about <n> prompts next time
+- **Goal impact:** <only with `brief.md`: how this moves the goal, with the arithmetic>
 - **Confidence:** high | medium | low
 - **Changes a standing user rule?** no | yes: <which one, from memory or the rule files>
 - **Scope:** this project | workspace (any project)
@@ -64,6 +66,8 @@ Rules for proposals:
 - **Generalize.** State what future agents must do on any project of this family, not just the one case. Add a principle only if it would have changed what the agent did.
 - **No side effects in the proposal itself.** Don't propose running renders, deploys, browsers or applications as part of applying the fix.
 - `.claude/` files (skills, agents, hooks) are allowed as **Files**. The retro skill applies those changes itself.
+- **Outside facts need a source.** You don't browse, so a fact about an outside service, API or site that you can't cite from the repo or the logs is `unverified`. Never present it as known.
+- Refer to the user as "the human" or they/them.
 
 ## 4. Safety
 

@@ -40,6 +40,7 @@ Your first command is `date +%s`. Write the number down as START. Check with `ec
 
 ## 4. Test and commit
 
+0. **Reference check before you commit:** resolve every path, script, agent name and step or section number you wrote (`ls`, `grep`, `git ls-files`, or `grep '"<script>"' package.json`). For each step or section you renumbered or renamed, run `grep -rn '<old ref>'` across the repo. Fix the hits in your own files, and list hits in other files in your report. If you add a tool or agent, add it to the README lists you own.
 1. Run the test command if there is one. The baseline failures in your prompt failed before any retro change, so they aren't yours. If anything else fails because of your change, fix it. If it fails for reasons unrelated to your change, say so and still commit your doc-only changes.
 2. Commit with `git add <your paths>`. Write a message that says what changed and why, citing the retro: `Retro <run>: <what>`. End it with the co-author line your prompt gives, if any.
 
@@ -47,6 +48,7 @@ Your first command is `date +%s`. Write the number down as START. Check with `ec
 
 Reply in at most 15 lines:
 - the commit hash and the files changed;
+- `Refs checked: <n>, fixed <n>, left for main agent: <list or none>`;
 - one line per finding: what you wrote, and where;
 - the "For the main agent: .claude/ changes" block, if any;
 - anything you skipped, and why.

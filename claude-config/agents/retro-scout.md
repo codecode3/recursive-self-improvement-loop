@@ -87,7 +87,7 @@ Main build session: `<id>` (<start>–<end> Central, <N> prompts, <M> subagents,
 - **Keep** exact duplicates, since the human did send them twice. Mark them `repeat`.
 - **Queued prompts** are messages the human typed while the agent was still working.
   - They are stored as lines with `type` `attachment` and `attachment.type` `queued_command`. The text is `attachment.prompt`: a string, or a list of parts.
-  - Count each one whose text doesn't start with `<task-notification>` or `<system-reminder>`, once per distinct text, and mark it `[queued]`.
+  - Count each one whose text, after stripping leading whitespace, doesn't start with `<` (pasted text starting with `<pasted_content` still counts), once per distinct text, and mark it `[queued]`. This drops `<task-notification>`, `<system-reminder>`, `<agent-message>`, `<cross-session-message>` and any other machine tag. Count the dropped lines per tag for the headline.
   - Report typed and queued prompts separately, and their sum as the total.
 - Subagent transcripts have no human prompts. Their "user" lines come from the main agent.
 
@@ -106,12 +106,14 @@ Measure:
 ```markdown
 # Metrics: <target>
 
-- Prompts: <typed> typed + <queued> queued = <total> (<per session, main first>)
+- Prompts: <typed> typed + <queued> queued = <total> (<per session, main first>) (+<n> machine queued dropped: <tag> <count>, …)
 - Wall time: <first prompt> → <last prompt> = <h> h <m> m
 - Subagents: <n> (<k> stopped by the human, <j> committed anyway)
 - Hotspots: <subject> (<prompts>), …
+- Prompts per milestone: <milestone> <n>, … (the family's milestones from the target notes; "none listed" if the notes have none)
+- Rule deviations: none | <each place you departed from this file's rules, and why>
 ```
-Then a section for each measure, using tables and short bullets.
+Then a section for each measure, using tables and short bullets. A deviation you had to make is a lesson for the pipeline: the retro writes it into the ledger's `Pipeline:` line.
 
 ## 4. Label every prompt → `prompts.md`
 
