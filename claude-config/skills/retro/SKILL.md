@@ -13,7 +13,7 @@ The home is `~/antigravity-projects/RSI-session-retro/` (RSI below). `SPEC.md` t
 - **Lessons with workspace scope** (any project, not just this one) are marked `needs OK` and go to `~/antigravity-projects/AGENTS.md`. Project lessons go to the project's own rule files.
 - **--read-only** (also "read-only", "read only mode", "report only" or "don't change anything" in the prompt): see "Read-only mode".
 - **--goal "<text>"** (also "Goal: …" in the prompt): see stage 2 and the report format.
-- **--resume <run>:** pick up `RSI/runs/<run>/`. Retake the lock and start at the first stage whose output is missing: no `metrics.md` → stage 1, missing findings → stage 2, no `report.md` or no `Open after fixes: 0` in `checks/report-check.md` → stage 3, otherwise stage 4. If `report.md` already has `## Approved`: stage 5 for the sets with no commit in `applied.md`, stage 6 if every set has one and no re-check file ends `Open: 0`, else stage 7. If the human's message already names sets ("apply A and C"), that is the approval, so start at stage 5.
+- **--resume <run>:** pick up `RSI/runs/<run>/`. Retake the lock and start at the first stage whose output is missing: no `metrics.md` → stage 1, missing findings → stage 2, no `report.md` or no `Open after fixes: 0` in `checks/report-check.md` → stage 3, otherwise stage 4. If `report.md` already has `## Approved`: stage 5 for the sets with no commit in `applied.md`, stage 6 if every set has one and `checks/fixes.md` doesn't end `Stage 6 passed`, else stage 7. For an `awaiting approval` run, a message that already names sets ("apply A and C") is the approval, so start at stage 5.
 - **--replay <commit>:** a test run on a scratch copy. See "Replay mode".
 - **--stage scout:** stop after stage 1.
 - **--run-dir <folder>:** put the run folder (and the lock) there instead of `RSI/runs/`. Only for replays and tests that must leave no files in any repo, never for a live read-only run.
@@ -31,7 +31,7 @@ The home is `~/antigravity-projects/RSI-session-retro/` (RSI below). `SPEC.md` t
 The human wants a report now and will approve later. "Read-only" means no changes to the target or to rule files. It doesn't mean "leave no trace".
 - The run folder and lock still go in `RSI/runs/`. That folder is gitignored, so writing there is not a repo change.
 - Run stages 0–3, then stage 4's ONE question with one extra option, "None now, keep it read-only". A picked set is the human's approval and ends read-only mode.
-- If nothing is approved: set `Status: awaiting approval`, write `<run folder>/ledger-entry.md` (stage 7 format, `Status: proposed, not applied`), and don't commit. Release the lock. Print the stage-7 final note with the pending sets under "Waiting on you" and the line `Resume: /retro <target> --resume <run> [A B C N1…]`.
+- If nothing is approved: run stage 7 except step 4 (no commit). Step 1 writes `<run folder>/ledger-entry.md` (`Status: proposed, not applied`), step 2 puts the eval score there, and step 3 sets `Status: awaiting approval` (or `stopped: run folder outside runs/`) and releases the lock. The final note lists the pending sets under "Waiting on you" and adds the line `Resume: /retro <target> --resume <run> [A B C N1…]`.
 
 ## 0. Lock and set up
 
@@ -50,7 +50,7 @@ Launch one `retro-scout`. Give it:
 - the target, the project path and the notes file;
 - the run folder;
 - the session ids to exclude: this session, and any retro sessions you know of. (When the target is the retro pipeline itself, retro sessions are the target, so exclude only this one.)
-- `--since <date>`, if given: sessions whose last human prompt is before it are left out.
+- `--since <date>`, if given (the scout marks older sessions `excluded`).
 
 When it finishes, read the headline block of `metrics.md` and the table in `sessions.md`.
 
@@ -156,7 +156,7 @@ Print the goal verdict (if any), the report's "What went wrong" section and the 
    - every edit outside git, with its before/after text from `applied.md`.
    Open each check file. If it has no `Inventory:` line, or `Grepped only:` is anything but `none`, relaunch that checker once before using it.
 2. Apply their fixes yourself in one round, in the same files. A fix to a `.claude/` file or its `claude-config/` copy goes through stage 5 step 5 (live file first, then sync), never into the copy alone. Skip any fix that would undo an approved change, or that would change a standing user rule, and note it in `checks/fixes.md` with the reason. Run the tests, then commit (`Retro <run>: checker fixes`).
-3. **Re-check:** launch one more `retro-checker` in re-check mode (`checks/checker-3.md`) with both reports, `fixes.md` and the fix commit. Pass = 0 open issues of any kind, each skip with a reason in `fixes.md`, and each item that needs the human in "Waiting on you". Fix anything it finds the same way, and confirm each of those fixes in `fixes.md` with the `grep`/`sed -n` line that shows the new text. Run a fourth checker only if the re-check found a contradiction.
+3. **Re-check:** launch one more `retro-checker` in re-check mode (`checks/checker-3.md`) with both reports, `fixes.md` and the fix commit. Pass = 0 open issues of any kind, each skip with a reason in `fixes.md`, and each item that needs the human in "Waiting on you". Fix anything it finds the same way, and confirm each of those fixes in `fixes.md` with the `grep`/`sed -n` line that shows the new text. Run a fourth checker only if the re-check found a contradiction. When the pass holds (the last checker ends `Open: 0`, or each of its issues is confirmed in `fixes.md`), end `fixes.md` with the line `Stage 6 passed`.
 4. **Enforceability:** confirm the checkers found no rule without a check. If they did, fix it in that same round.
 5. **Smoke test:** for each `.claude/` agent, skill or hook that was added or changed:
    - Confirm the file's frontmatter parses: name, description, tools, model.
@@ -173,7 +173,7 @@ Print the goal verdict (if any), the report's "What went wrong" section and the 
    - `Pipeline:` lessons about the retro pipeline itself from this run, always including the scout's `Rule deviations:` line and any smoke-test lesson in `applied.md`, or "none";
    - the `Checks:` line.
    The `--resume` apply of an earlier read-only run moves that run's `ledger-entry.md` into `ledger.md` instead of adding a second entry. Any other run that commits `ledger.md` only lists that entry's pending sets under `## Open decisions`. Update `## Open decisions`: add each "Waiting on you" item, and close the ones this run decided.
-2. **Eval rows scored by live runs:** if the target notes' `## Evals` says a section is scored at this kind of run (the Slop eval's R section at each meta-retro), score it from `prompts.md`, add a Results row, and commit it on its own (`Retro <run>: eval R row`). A run that stops before stage 5 skips this and writes the R score into its `ledger-entry.md` instead.
+2. **Eval rows scored by live runs:** if the target notes' `## Evals` says a section is scored at this kind of run (the Slop eval's R section at each meta-retro), score it from `prompts.md`, add a Results row, and commit it on its own (`Retro <run>: eval R row`). A run that stops before stage 5 skips this and adds `; eval R <hits>/2` to the `Numbers:` line of its `ledger-entry.md` instead.
 3. **Release the lock.** If the run folder isn't under `RSI/runs/` and no `--run-dir` was given, set `Status: stopped: run folder outside runs/`. Otherwise set `Status: done`, or keep `Status: awaiting approval` for a run that stopped before stage 5.
 4. **Commit** the RSI repo's own changes: `ledger.md`, and `targets/` if you added notes. `runs/` is gitignored.
 5. **Claims:** any claim in the final note about files this run didn't commit ("already covered", "missing", "N of M exist") goes through the report-mode checker first, like `report.md` did. It writes `checks/claims-check.md`, and the note goes out only after its `## Main agent fixes` ends `Open after fixes: 0`.

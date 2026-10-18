@@ -90,7 +90,7 @@ The scout keeps the raw transcripts out of the main agent's context, so the main
 - **Arguments.** `--read-only` (also "read-only" or "report only" in the prompt; see §8), `--goal "<text>"` (also "Goal:" in the prompt), `--resume <run>`, `--stage scout`, `--replay <commit>`, `--since <date>`, and `--run-dir <folder>`. `--run-dir` is only for replays and tests. Every other run keeps its folder and lock in `runs/` (gitignored), so other sessions can see the lock.
 - **Run status.** The first line of `report.md` (of `metrics.md` for a scout-only run) is `Status: awaiting approval | scout-only (asked to find logs) | applying | done | stopped: <why>`. Every exit updates it. A scout-only run doesn't create empty `findings/` and `checks/` folders. Check: `grep -HE '^(- )?Status:' runs/*/report.md runs/*/metrics.md runs/*/ledger-entry.md`.
 - **Open runs and decisions.** Stage 0 runs that grep and lists every run of the target that isn't `done`, plus the target's items under `## Open decisions` in `ledger.md`.
-- **Resume.** `--resume <run>` starts at the first stage whose output is missing (stage 4 when `report.md` passed its report check). A reply that names sets for an `awaiting approval` run ("apply A and C") counts as its approval.
+- **Resume.** `--resume <run>` starts at the first stage whose output is missing (stage 4 when `report.md` passed its report check; stage 5, 6 or 7 once it has `## Approved`, see the skill's `--resume` bullet). A reply that names sets for an `awaiting approval` run ("apply A and C") counts as its approval.
 
 ### 1. Scout
 One `retro-scout` agent. It does today's first three manual steps in one pass and writes three files to `runs/<target>-<date>/`.
