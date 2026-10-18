@@ -54,4 +54,4 @@ It prints `OK: 5 files parse, live == copy` on a pass, and `STALE <file>` or `BA
 
 ## Evals
 
-- `evals/slop-replay.md`: replay with `/retro slop --replay a9bcb34`. Its R section is scored from this target's scout `prompts.md` at each meta-retro.
+- `evals/slop-replay.md`: replay with `/retro slop --replay a9bcb34`. Its R section is scored from this target's scout `prompts.md` at each meta-retro: in stage 7 the main agent adds a Results row (Run = the meta-retro's run id, Key = `key@<hash>`, M1–M4 `not run`, R `<hits>/2` citing the `prompts.md` row numbers) and commits it on its own.

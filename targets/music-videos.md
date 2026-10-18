@@ -40,7 +40,7 @@ A milestone not reached is written `not reached`, never guessed.
 
 ## Rule files
 
-- **Rules repo:** `music-videos/CLAUDE.md`, `README.md`, `guide/*.md`, `template/*.md`, `CATALOG.md`.
+- **Rules repo:** `music-videos/CLAUDE.md`, `README.md`, `guide/*.md`, `template/*.md`, `assets/CATALOG.md`.
 - **Each video:** `videos/<slug>/CLAUDE.md`. `videos/<slug>/docs/*.md` is history, not rules.
 - **Claude Code** (live, guarded) under `~/antigravity-projects/.claude/`:
   - `skills/new-music-video/SKILL.md`, `skills/youtube-thumbnails/SKILL.md`;

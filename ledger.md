@@ -1,6 +1,6 @@
 # Retro ledger
 
-One entry per run, newest last. The `followup` lens reads this file to check whether earlier lessons held. A run that stops before applying (read-only, or no set picked) writes its entry to `runs/<run>/ledger-entry.md` instead, with `Status: proposed, not applied` and no commit. Stage 0 and the `followup` lens read those files too. The next run that commits here (the `--resume` apply, or any later run) moves the entry here and lists its pending sets under Open decisions. Replay runs write their entry into their own run folder, not here. Check: `grep -c "^- Status:" ledger.md` and `grep -c "^- Pipeline:" ledger.md` both equal `grep -c "^## .*(" ledger.md`, the number of run entries (each count includes the format block below).
+One entry per run, newest last. The `followup` lens reads this file to check whether earlier lessons held. A run that stops before applying (read-only, or no set picked) writes its entry to `runs/<run>/ledger-entry.md` instead, with `Status: proposed, not applied` and no commit. Stage 0 and the `followup` lens read those files too. The `--resume` apply of that run moves the entry here. Any run that commits here lists the entry's pending sets under Open decisions. Replay runs write their entry into their own run folder, not here. Check: `grep -c "^- Status:" ledger.md` and `grep -c "^- Pipeline:" ledger.md` both equal `grep -c "^## .*(" ledger.md`, the number of run entries (each count includes the format block below).
 
 Entry format:
 ```markdown
@@ -19,12 +19,12 @@ A prediction names its milestone and scope, for example `predicted: 3 prompts to
 
 ## Open decisions
 
-Every "waiting on you" item, one line each, oldest first. Stage 0 lists the target's open items, stage 4 offers any item open across 2 or more runs, and the `followup` lens reports it as a finding. Close an item in place with its date and answer.
+Every "waiting on you" item, one line each, oldest first. Stage 0 lists the target's open items, stage 4 offers any item open across 2 or more runs, and the `followup` lens reports it as a finding. Close an item in place with its date and answer. "Open across N runs" counts the asking run plus every later run folder in `runs/` (any target; scout-only runs and replays excluded) dated on or after the `asked` date (`ls runs/`).
 
 Format: `- [<run>] <item>, asked <date>; status open | closed <date>: <answer>`
 
 - [slop replay, 5c14025c] The music-videos guide fixes the Slop replay found and the live guides still lack, proposed 2026-10-14 21:38 and never answered: the CLAUDE.md standing list, a setup-form split field, a known-bugs section plus a `Rendered:` line, an 8/10 stopping bar, a take-switch impact table, a BrowserOS fallback, optional `lint_geometry.py`, compaction re-inject and backlog Stop hooks; needs OK: a hero sign-off stop (memory `rsi-session-retro.md`, "Still missing, proposed to the user and NOT applied"), asked 2026-10-14; status open.
-- [captcha-2026-10-15] Ban `fork` as a missing-agent fallback (HANDOFF "Open" 1), asked 2026-10-15; status closed 2026-10-18: not banned. R10's wait-a-turn retry makes the fallback rare, and the user left the call to the main agent.
+- [captcha-2026-10-15] Ban `fork` as a missing-agent fallback workspace-wide and in the music-video guides (HANDOFF "Open" 1), asked 2026-10-15; status closed 2026-10-18: not banned outside the retro skill (which already bans it for retro agents, `SKILL.md` "Agents"). R10's wait-a-turn retry makes the fallback rare, and the user left the call to the main agent.
 - [autojob-2026-10-18] Sets A, B, C and N1–N4 from `runs/autojob-2026-10-18/report.md`, asked 2026-10-18; status open. Resume: `/retro autojob --resume autojob-2026-10-18`.
 
 ## captcha-2026-10-15 (music-video)

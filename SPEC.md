@@ -4,7 +4,7 @@
 
 **No scripts.** Agents do every stage by inference. They read the transcripts with ordinary shell commands and one-off parsing, the way the manual Slop retro did. The project is made of prompts only: one skill, four agents and the lens prompts.
 
-Status: M1–M4 built and tested; M5 written, untested (no AGY/Codex target yet). The skill, 4 agents, 7 lenses, target notes and the Slop eval date from 2026-10-14. The Slop replay's 10 pipeline fixes are applied, and its results are in `evals/slop-replay.md`. The end-of-project offer is dropped (§10.3). Times are Central.
+Status: M1–M4 built and tested; M5 written, untested (no AGY/Codex target yet). The skill, 4 agents, 7 lenses, target notes and the Slop eval were built 2026-10-14 and last revised 2026-10-18 (retro RSI-session-retro-2026-10-18). The Slop replay's 10 pipeline fixes are applied and untested until the next replay row; results are in `evals/slop-replay.md`. The end-of-project offer is dropped (§10.3). Times are Central.
 
 ---
 
@@ -72,7 +72,7 @@ The skill tells agents where each runtime keeps its logs. The agents work out th
       │
   0 Start ─── lock; list open runs and decisions; resume?                 [main agent]
   1 Scout ─── find sessions, measure, label every human prompt            [retro-scout]
-  2 Analyze ─ 5 fixed lenses + up to 3 hotspot lenses, read-only          [retro-analyst ×N]
+  2 Analyze ─ 5 fixed + up to 3 hotspot (+1 for a goal), read-only          [retro-analyst ×N]
   3 Synthesize ─ dedupe, check against existing rules, rank, group        [main agent]
     + report check: re-run every citation and number                      [retro-checker]
   4 Approve ─ ONE question: which change sets to apply                    [human]
@@ -81,16 +81,16 @@ The skill tells agents where each runtime keeps its logs. The agents work out th
   7 Report ── organized note + ledger entry + push notification           [main agent]
 ```
 
-The scout keeps the raw transcripts out of the main agent's context, so the main agent stays light enough to synthesize. After each stage, the main agent prints one line: `Retro: 1/7 scouted — 112 prompts, 10 h 28 m`.
+The scout keeps the raw transcripts out of the main agent's context, so the main agent stays light enough to synthesize. After each stage, the main agent prints one line: `Retro 1/7 scouted: 112 prompts, 10 h 28 m`.
 
 ## 5. Stages in detail
 
 ### 0. Start
-- **Routing.** `/retro <target>`, a retro or post-mortem request, "find the RSI project", "use/run the RSI project on <X> logs", or "RSI" with a project or logs all start the skill. A bare "find the RSI project" gets one location line plus "Which project's logs?" in the same reply.
+- **Routing.** `/retro <target>`, a retro or post-mortem request, "find the RSI project", "use/run the RSI project on <X> logs", or "RSI" with a project or logs all start the skill. A bare "find the RSI project" gets the reply in the skill's "A bare 'find the RSI project'" bullet.
 - **Arguments.** `--read-only` (also "read-only" or "report only" in the prompt; see §8), `--goal "<text>"` (also "Goal:" in the prompt), `--resume <run>`, `--stage scout`, `--replay <commit>`, `--since <date>`, and `--run-dir <folder>`. `--run-dir` is only for replays and tests. Every other run keeps its folder and lock in `runs/` (gitignored), so other sessions can see the lock.
-- **Run status.** The first line of `report.md` (of `metrics.md` for a scout-only run) is `Status: awaiting approval | scout-only (asked to find logs) | applying | done | stopped: <why>`. Every exit updates it. A scout-only run doesn't create empty `findings/` and `checks/` folders. Check: `grep -H '^Status:' runs/*/report.md runs/*/metrics.md`.
+- **Run status.** The first line of `report.md` (of `metrics.md` for a scout-only run) is `Status: awaiting approval | scout-only (asked to find logs) | applying | done | stopped: <why>`. Every exit updates it. A scout-only run doesn't create empty `findings/` and `checks/` folders. Check: `grep -HE '^(- )?Status:' runs/*/report.md runs/*/metrics.md runs/*/ledger-entry.md`.
 - **Open runs and decisions.** Stage 0 runs that grep and lists every run of the target that isn't `done`, plus the target's items under `## Open decisions` in `ledger.md`.
-- **Resume.** `--resume <run>` starts at stage 4 from that run's `report.md`. A reply that names sets for an `awaiting approval` run ("apply A and C") counts as its approval.
+- **Resume.** `--resume <run>` starts at the first stage whose output is missing (stage 4 when `report.md` passed its report check). A reply that names sets for an `awaiting approval` run ("apply A and C") counts as its approval.
 
 ### 1. Scout
 One `retro-scout` agent. It does today's first three manual steps in one pass and writes three files to `runs/<target>-<date>/`.
@@ -175,7 +175,7 @@ The main agent:
 
 Output: `report.md` in the organized note format the human asked for. Every R-item has a `Covered now:` field: `file:line "quote"`, or `none (grep …)`. In a goal-led run the report opens with `## Goal verdict`: reachable or not, the main bottleneck with its number, and the change set that moves it.
 
-**Report check.** Before stage 4, one `retro-checker` in report mode re-runs every citation and recomputes the headline numbers. It writes `checks/report-check.md`, which must end `Wrong: 0` before the question goes out. The same claims mode covers any "already covered / missing / N of M" claim in a final note or an ad-hoc answer.
+**Report check.** Before stage 4, one `retro-checker` in report mode re-runs every citation and recomputes the headline numbers. It writes `checks/report-check.md`, ending `Wrong: <n>`. The main agent fixes each wrong claim and appends `## Main agent fixes`, ending `Open after fixes: 0`, before the question goes out. The same claims mode covers any "already covered / missing / N of M" claim in a final note or an ad-hoc answer.
 
 ### 4. Approve (the only required human step)
 The pipeline asks one AskUserQuestion with multi-select. Each option is a change set and its description gives the files and the prompts it would save. The default is all sets that don't change a standing rule. Rule changes are listed separately and need an explicit tick. Any ledger decision open across 2 or more runs is offered as a `needs OK` option. A read-only run adds the option "None now, keep it read-only".
@@ -207,7 +207,7 @@ The pipeline launches one `retro-applier` per approved change set, all in one me
 
   It is printed in the terminal and sent as a push notification on finish. A read-only run prints it too.
 - **The ledger:** one entry per run is appended to `ledger.md`, in the format at the top of that file: status, the key numbers, accepted proposals with scoped predictions and commits, a `Pipeline:` line for lessons about the pipeline itself, and the `Checks:` line. Every "waiting on you" item goes under `## Open decisions` there, and is closed with its answer when decided.
-- **Early stops.** A run that stops before stage 5 (read-only, or no set picked) writes `<run>/ledger-entry.md` with `Status: proposed, not applied` and makes no commit. Stage 0 and the `followup` lens read these files. The next run that commits the ledger (the `--resume` apply, or any later run) moves the entry into `ledger.md` and its pending items under `## Open decisions`.
+- **Early stops.** A run that stops before stage 5 (read-only, or no set picked) writes `<run>/ledger-entry.md` with `Status: proposed, not applied` and makes no commit. Stage 0 and the `followup` lens read these files. The `--resume` apply of that run moves the entry into `ledger.md` (see the header of `ledger.md`); until then its pending sets sit under `## Open decisions`.
 
 ## 6. The recursive part
 
@@ -240,9 +240,9 @@ These live where the workspace expects them, `antigravity-projects/.claude/`, be
 | `agents/retro-scout.md` | claude-opus-5-5 / medium | Read, Bash, Write (run folder only) |
 | `agents/retro-analyst.md` | claude-opus-5-5 / medium | Read, Bash, Write (its findings file only) |
 | `agents/retro-applier.md` | claude-opus-5-5 / medium | Read, Edit, Write, Bash |
-| `agents/retro-checker.md` | claude-sonnet-5-5 / medium | Read, Bash |
+| `agents/retro-checker.md` | claude-sonnet-5-5 / medium | Read, Bash, Write (its check file only) |
 
-Retro agents, checkers included, follow the user's latest standing model/effort setting (memory `subagent-model-effort.md`). It is passed on every Agent call. The frontmatter above is the fallback when the memory names none. The final note's `Agents:` line records what ran. The general-purpose agent is never used.
+Retro agents, checkers included, follow the user's latest standing model/effort setting (memory `subagent-model-effort.md`). It is passed on every Agent call. The frontmatter above is the fallback when the memory names none. The final note's `Agents:` line records what ran, read from each agent's transcript (`grep -o '"model":"[^"]*"' <agent>.jsonl | sort -u`). The general-purpose agent is never used.
 
 **Per-project notes:** `targets/<family>.md` (or a `retro.md` in the project), found by the target's name or alias. The scout and analysts read it first. It lists:
 - **Aliases** (for music videos: slop, hello tomorrow, frutiger aero realm, ne robei), so the scout finds sessions by name.
@@ -285,9 +285,9 @@ Slop is the replay benchmark, because the manual run gives the expected answers.
 |---|---|---|
 | **M1** Scout | `retro` skill (stages 0–1), `retro-scout` agent, `evals/slop-replay.md` | On Slop, the scout finds `be559bb6` (+28 subagents), `4ba9f639`, `e078b0ec` and `d6e38151`; marks `4d1a7a68` as mention-only and today's retro sessions as retro; counts **112 typed prompts (76 / 18 / 12 / 6) plus 13 queued = 125**, **10 h 28 m**, **28 subagents**; names Juno as a hotspot. (The manual count said 111. It left out one pasted-only prompt and the queued ones.) |
 | **M2** Analysis | the lens prompts, `retro-analyst`, the synthesis section of the skill | The Slop report contains ≥ 8 of the 10 reference findings below, each with a quote and a time. |
-| **M3** Apply + verify | approval step, `retro-applier`, `retro-checker`, ledger | On a scratch copy of `music-videos`: commits land, tests pass, no contradictions remain, and no applier transcript contains a side-effect command. |
+| **M3** Apply + verify | approval step, `retro-applier`, `retro-checker`, ledger | On a scratch copy of `music-videos`: commits land, tests pass, 0 open issues of any kind remain after the re-check, and no applier transcript contains a side-effect command. |
 | **M4** Recursion | `followup` lens, escalation | Replaying Hello Tomorrow → Slop shows which Hello Tomorrow-era rules were ignored on Slop. |
-| **M5** More sources | AGY and Codex sections in the skill; optional end-of-project offer | The scout handles one AGY and one Codex project. |
+| **M5** More sources | AGY and Codex sections in the skill (the end-of-project offer is dropped, §10.3) | The scout handles one AGY and one Codex project. |
 
 **Reference findings** (from today's manual reports):
 1. Juno's appearance loop: about 4 hours, 8 subagent rounds plus 17 side-session requests.

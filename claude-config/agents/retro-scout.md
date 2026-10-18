@@ -51,7 +51,7 @@ Classify every session you look at:
 - **side:** a separate build session that ran at the same time as the main one, for example a session the human opened to fix one asset. Side sessions count as build.
 - **post-release:** work on the target after it shipped, for example a new thumbnail or a later bug fix. Listed with what it did, not analyzed unless the human asks.
 - **mention-only:** listed, not analyzed.
-- **retro:** it mostly reads other transcripts. Listed, not analyzed.
+- **retro:** it mostly reads other transcripts. Listed, not analyzed, unless the target notes define their own session kinds (the retro pipeline's notes do): then use those.
 - **excluded:** given to you as excluded, or the session that launched you.
 
 Ask only if you can't place a session: put it under "Uncertain" with one line on why, and the retro skill will ask the human.
@@ -82,6 +82,7 @@ Main build session: `<id>` (<start>–<end> Central, <N> prompts, <M> subagents,
   - `[Request interrupted`
   - `This session is being continued`
   - `Caveat:`
+  - any other machine tag (`<agent-message>`, `<cross-session-message>`, …): the same `<` rule as queued lines below, `<pasted_content` excepted.
 - Also drop a typed slash command: text whose first word starts with `/`, for example `/compact`.
 - **Keep** a prompt that is only pasted text, even one that starts with `<pasted_content`. Mark it `pasted`.
 - **Keep** exact duplicates, since the human did send them twice. Mark them `repeat`.
