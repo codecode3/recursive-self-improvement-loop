@@ -9,7 +9,7 @@ The expected answers come from the manual retro of 2026-10-14: sessions `7fea9bc
 
 **Scoring rules** (the key is everything from M1 to R below):
 - Score a run against the key as it stood at the run's start, and record that key's commit in the Results row (`key@<hash>`).
-- Change the key only in its own commit, with a line saying why. Check: `git log -p evals/slop-replay.md` shows no commit that changes both a key item and a Results row.
+- Change the key only in its own commit, with a line saying why. Check: `git log -p 2f42403.. -- evals/slop-replay.md` shows no commit that changes both a key item and a Results row (8785532 did, before this rule).
 - After any pipeline fix found by a replay, the status is "fixes untested" until the next replay row.
 
 ## M1: scout (each item is a hit or a miss)
