@@ -13,7 +13,7 @@ The home is `~/antigravity-projects/RSI-session-retro/` (RSI below). `SPEC.md` t
 - **Lessons with workspace scope** (any project, not just this one) are marked `needs OK` and go to `~/antigravity-projects/AGENTS.md`. Project lessons go to the project's own rule files.
 - **--read-only** (also "read-only", "read only mode", "report only" or "don't change anything" in the prompt): see "Read-only mode".
 - **--goal "<text>"** (also "Goal: …" in the prompt): see stage 2 and the report format.
-- **--resume <run>:** pick up `RSI/runs/<run>/`. Retake the lock and start at the first stage whose output is missing: no `metrics.md` → stage 1, missing findings → stage 2, no `report.md` or no `Open after fixes: 0` in `checks/report-check.md` → stage 3, otherwise stage 4. If `report.md` already has `## Approved`: stage 5 for the sets with no commit in `applied.md`, stage 6 if every set has one and `checks/fixes.md` doesn't end `Stage 6 passed`, else stage 7. For an `awaiting approval` run, a message that already names sets ("apply A and C") is the approval, so start at stage 5.
+- **--resume <run>:** pick up `RSI/runs/<run>/`. Retake the lock and start at the first stage whose output is missing: no `metrics.md` → stage 1, missing findings → stage 2, no `report.md` or no `Open after fixes: 0` in `checks/report-check.md` → stage 3, otherwise stage 4. If `report.md` already has `## Approved`: stage 5 for the sets with no commit in `applied.md`, stage 6 if every set has one and `checks/fixes.md` doesn't end `Stage 6 passed`; in "Self-target mode", its step 4 if `applied.md` has no `promoted:` line; else stage 7. For an `awaiting approval` run, a message that already names sets ("apply A and C") is the approval, so start at stage 5.
 - **--replay <commit>:** a test run on a scratch copy. See "Replay mode".
 - **--stage scout:** stop after stage 1.
 - **--run-dir <folder>:** put the run folder (and the lock) there instead of `RSI/runs/`. Only for replays and tests that must leave no files in any repo, never for a live read-only run.
@@ -42,7 +42,7 @@ The human wants a report now and will approve later. "Read-only" means no change
 3. **Other sessions:** run `ListAgents`. If another live session is editing this project's rule files, check its latest commits (`git log -5`). Avoid those files in stage 5, or message that session to split them.
 4. **Current session:** note its id, the newest `.jsonl` in `~/.claude/projects/<slug>/`. The scout must exclude it.
 5. **Unfinished business:** `grep -HE '^(- )?Status:' RSI/runs/*/report.md RSI/runs/*/metrics.md RSI/runs/*/ledger-entry.md`, plus the `## Open decisions` in `RSI/ledger.md`. Print this target family's runs that aren't `done` (with their resume line) and its open decisions in the stage-0 progress line.
-6. **Test and `.claude/` copies:** run the target notes' test command or sync check (`## Test command`, a `--check`, or a `diff -q` one-liner) and record the result in the lock. Run it again after stage 5, and once more after stage 6's last fix commit; the final note's "`.claude/` copies" count comes from that last run.
+6. **Test and `.claude/` copies:** run the target notes' test command or sync check (`## Test command`, a `--check`, or a `diff -q` one-liner) and record the result in the lock. Run it again after stage 5, and once more after stage 6's last fix commit (in "Self-target mode", after promotion instead, where it must print `OK`); the final note's "`.claude/` copies" count comes from that last run.
 
 ## 1. Scout
 
@@ -130,7 +130,7 @@ Print the goal verdict (if any), the report's "What went wrong" section and the 
 ## 5. Apply
 
 1. Set `Status: applying`. Write the approved sets, and the approved `needs OK` items inside them, at the end of `report.md` under `## Approved`.
-2. **Baseline tests:** run the test command once, before any change. List its failures in `applied.md` as the baseline.
+2. **Baseline tests:** run the test command once, before any change. Start `applied.md` with `Pre-run HEAD: <hash>` (the rules repo's HEAD now) and list the test's failures as the baseline.
 3. Launch one `retro-applier` per approved set, **all in ONE message**, in the background. Each prompt gives:
    - the run folder and set id;
    - the repo and the files it owns, plus which files the other sets own;
@@ -151,7 +151,7 @@ Print the goal verdict (if any), the report's "What went wrong" section and the 
 
 1. Launch two `retro-checker` agents in ONE message, `checks/checker-1.md` and `checks/checker-2.md`. Each gets:
    - all the rule files;
-   - the `.claude/` skill and agent files the project uses;
+   - the `.claude/` skill and agent files the project uses (in "Self-target mode", the `claude-config/` copies; see its step 2);
    - the commit range: the HEAD from before stage 5, through HEAD;
    - every edit outside git, with its before/after text from `applied.md`.
    Open each check file. If it has no `Inventory:` line, or `Grepped only:` is anything but `none`, relaunch that checker once before using it.
@@ -203,17 +203,17 @@ Replay mode tests the pipeline against a project whose answers are already known
    - skip files committed after `<commit>`, the live `.claude/` files, and the user's memory.
 4. Don't ask the approval question. Apply every set that isn't `needs OK`, and say so in the final note.
 5. Then score the run against the eval file the notes name (`RSI/evals/…`), using the key as it stood when the run started: write `<run folder>/score.md`, with each expected item marked hit or missed.
-6. **Fixes to the pipeline itself** that the replay turns up (SKILL, agents, lenses, SPEC): apply them, then run stage 6 on them (two checkers on the commit range, then the re-check) before reporting. The eval's status stays "fixes untested" until the next replay row.
+6. **Fixes to the pipeline itself** that the replay turns up (SKILL, agents, lenses, SPEC): apply them as in "Self-target mode" (edit the `claude-config/` copies, promote after `Stage 6 passed`), then run stage 6 on them (two checkers on the commit range, then the re-check) before reporting. The eval's status stays "fixes untested" until the next replay row.
 
 ## Self-target mode (the retro pipeline itself)
 
 When the target notes say `Self-target: yes` (`targets/RSI-session-retro.md`), the run changes the skill and agents it is running on. The live `.claude/` files are the version this run started with and the version every other session uses, so they stay frozen until the run's changes pass stage 6:
-1. **Edit the copy only.** Stage 5 step 5 and every stage 6 fix to a skill or agent write `RSI/claude-config/<f>`, never `.claude/<f>`. Of the step 5 recipe, keep Parse and Commit; Load, Sync and the smoke test wait for promotion.
+1. **Edit the copy only.** Stage 5 step 5 and every stage 6 fix to a skill or agent write `RSI/claude-config/<f>`, never `.claude/<f>`. Of the step 5 recipe, keep Parse and Commit, and write `<file>: parsed / copy <hash>` to `applied.md`. Promotion (step 4) replaces Sync, and Load and the smoke test wait for it.
 2. **Checkers read the copies.** Stage 6 checkers get the `claude-config/` files as the skill and agent files, and are told the live ones are the frozen pre-run version.
 3. **Test command:** until promotion, a `STALE` line for a file this run changed is expected. Any other failure counts.
-4. **Promote** after `Stage 6 passed`: for each changed file, write `.claude/<f>` from `claude-config/<f>` with the Write tool, not `cp` through Bash (Claude Code's prompt for `.claude/` edits is the human's check). Then the test command must print `OK: 5 files parse, live == copy`, the files must load (see "Agents"), and stage 6 step 5's smoke test runs on them.
-5. **Roll back** a file whose smoke test fails: restore `git show <pre-run HEAD>:claude-config/<f>` onto both the live file and the copy, commit the copy, and list it under "Waiting on you".
-6. Add `promoted: <files>, smoke ok | rolled back: <files>` to `applied.md`, and put it in the final note's Checks line. The promoted version is untested on the Slop replay until its next Results row, so the final note offers `/retro slop --replay a9bcb34` under "Waiting on you".
+4. **Promote** after `Stage 6 passed`: first confirm each live file still equals its pre-run copy (from `antigravity-projects`: `git -C RSI-session-retro show <pre-run HEAD>:claude-config/<f> | diff -q - .claude/<f>`). If one differs, another session changed it: don't promote that file, and list it under "Waiting on you". Then, for each changed file, write `.claude/<f>` from `claude-config/<f>` with the Write tool, not `cp` through Bash (Claude Code's prompt for `.claude/` edits is the human's check). Then the test command must print `OK: 5 files parse, live == copy`, the files must load (see "Agents"), and stage 6 step 5's smoke test runs on them. For a changed agent, cross one turn boundary first (background `sleep 15`, end the turn, as in "Agents"), so the test doesn't run the frozen version.
+5. **Roll back** a file that fails its parse, its load (3 turns, see "Agents") or its smoke test: restore `git show <pre-run HEAD>:claude-config/<f>` onto the live file (Write tool, as in step 4) and onto the copy, commit the copy, rerun the test command (it must print `OK: 5 files parse, live == copy`), and list the file under "Waiting on you", with any other promoted file that refers to it. `<pre-run HEAD>` is the `Pre-run HEAD:` line at the top of `applied.md` (stage 5 step 2). A self-target run needs stage 0's test to print `OK` (live == copy); if it doesn't, the run stops before stage 5.
+6. Add `promoted: <files>, smoke ok | rolled back: <files>` to `applied.md`, and put it in the final note's Checks line. The replay comes after promotion, not before it: Claude Code loads agents only from `.claude/`, so the copies can't run a replay. The promoted version is untested on the Slop replay until its next Results row, so the final note offers `/retro slop --replay a9bcb34` under "Waiting on you".
 
 ## Other log sources
 

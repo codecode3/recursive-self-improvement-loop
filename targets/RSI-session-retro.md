@@ -50,7 +50,7 @@ It prints `OK: 5 files parse, live == copy` on a pass, and `STALE <file>` or `BA
 ## Forbidden actions for appliers
 
 - **No push and no deploy.**
-- **Live `.claude/` files:** only the main agent edits them. Claude Code's permission prompt for them is intended. Then it syncs the copies. Appliers write the exact change in their report.
+- **Live `.claude/` files and their `claude-config/` copies:** only the main agent edits them. Claude Code's permission prompt for the live files is intended. Then it syncs the copies (or, in a self-target run, edits the copies and promotes them). Appliers write the exact change in their report.
 - **Other projects' files** (for example `music-videos/`, `autojob/`), the workspace `AGENTS.md` and memory: never, unless a `needs OK` item was approved, and then only the main agent.
 
 ## Evals
