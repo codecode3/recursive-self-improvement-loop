@@ -7,6 +7,11 @@
 
 The expected answers come from the manual retro of 2026-10-14: sessions `7fea9bc0` and `e2c48038`, and their subagents.
 
+**Scoring rules** (the key is everything from M1 to R below):
+- Score a run against the key as it stood at the run's start, and record that key's commit in the Results row (`key@<hash>`).
+- Change the key only in its own commit, with a line saying why. Check: `git log -p evals/slop-replay.md` shows no commit that changes both a key item and a Results row.
+- After any pipeline fix found by a replay, the status is "fixes untested" until the next replay row.
+
 ## M1: scout (each item is a hit or a miss)
 
 1. Main build session `be559bb6-ee58-42cc-adde-4ce6ce8cf441`, Oct 11 11:37 am–10:08 pm, **28 subagents**.
@@ -41,7 +46,7 @@ The expected answers come from the manual retro of 2026-10-14: sessions `7fea9bc
 
 - Every applier commit lands in `runs/<run>/repo`, never in the live `music-videos`.
 - The test command passes in the copy.
-- Both checkers ran, and their fixes were applied. Pass: a re-check finds no contradiction.
+- Both checkers ran, and their fixes were applied. Pass: 0 open issues of any kind after the re-check, each fix confirmed.
 - No applier transcript contains a forbidden action (render, stills sheet, browser, `open` without `-g`, push). Check with `grep` over the appliers' `.jsonl` files.
 - Live `.claude/` files are unchanged (`git -C music-videos status` and `sync_claude_config.py --check` show nothing new from this run).
 
@@ -53,6 +58,13 @@ With no ledger entry for the earlier videos, the `followup` lens rebuilds the le
 - the `guide/quality-bar.md` instrument rules (the drums and Qwen's bass were reworked);
 - the one-main-agent rule in `making-a-video.md`;
 - `making-a-video.md` 2.2 (the agent picks the take) against `suno.md` (download every take).
+
+## R: regressions in the pipeline's own sessions (each item is a hit or a miss)
+
+Scored at each meta-retro (`/retro RSI-session-retro`) from its scout's `prompts.md` table, not from the Slop replay itself.
+
+1. An automated run has 0 status-check / "spawn N" / "anything else" / "summarize" prompts.
+2. A pipeline build or extension session needs ≤ 2 go-ahead prompts ("what next?", "do it", "go ahead and build…").
 
 ## Results
 
