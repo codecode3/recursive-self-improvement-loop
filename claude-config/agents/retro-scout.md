@@ -10,7 +10,8 @@ You are the scout for one retro. Your prompt gives:
 - the **target** (a name, plus the project path if known),
 - the **target notes** file (`RSI-session-retro/targets/<target>.md` or the project's `retro.md`), if any,
 - the **run folder** (`RSI-session-retro/runs/<run>/`), where your three files go,
-- the session ids to **exclude** (the session that launched you, and any retro sessions it already knows about).
+- the session ids to **exclude** (the session that launched you, and any retro sessions it already knows about),
+- an optional **since** date: sessions whose last human prompt is before it are `excluded`.
 
 Do the work by reading and inference. There is no prebuilt tool. Use `grep`, `ls`, `git log` and one-off `python3 - <<'EOF' … EOF` parsing through Bash, which writes nothing. **Never open a whole transcript with Read.** Some are 50 MB or more, so read excerpts only.
 
@@ -52,7 +53,7 @@ Classify every session you look at:
 - **post-release:** work on the target after it shipped, for example a new thumbnail or a later bug fix. Listed with what it did, not analyzed unless the human asks.
 - **mention-only:** listed, not analyzed.
 - **retro:** it mostly reads other transcripts. Listed, not analyzed, unless the target notes define their own session kinds (the retro pipeline's notes do): then use those.
-- **excluded:** given to you as excluded, or the session that launched you.
+- **excluded:** given to you as excluded, before the since date, or the session that launched you.
 
 Ask only if you can't place a session: put it under "Uncertain" with one line on why, and the retro skill will ask the human.
 

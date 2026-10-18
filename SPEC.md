@@ -242,7 +242,7 @@ These live where the workspace expects them, `antigravity-projects/.claude/`, be
 | `agents/retro-applier.md` | claude-opus-5-5 / medium | Read, Edit, Write, Bash |
 | `agents/retro-checker.md` | claude-sonnet-5-5 / medium | Read, Bash, Write (its check file only) |
 
-Retro agents, checkers included, follow the user's latest standing model/effort setting (memory `subagent-model-effort.md`). It is passed on every Agent call. The frontmatter above is the fallback when the memory names none. The final note's `Agents:` line records what ran, read from each agent's transcript (`grep -o '"model":"[^"]*"' <agent>.jsonl | sort -u`). The general-purpose agent is never used.
+Retro agents, checkers included, follow the user's latest standing model/effort setting (memory `subagent-model-effort.md`). It is passed on every Agent call. The frontmatter above is the fallback when the memory names none. The final note's `Agents:` line records what ran, read from each agent's transcript (the skill's "Model and effort" bullet has the command). The general-purpose agent is never used.
 
 **Per-project notes:** `targets/<family>.md` (or a `retro.md` in the project), found by the target's name or alias. The scout and analysts read it first. It lists:
 - **Aliases** (for music videos: slop, hello tomorrow, frutiger aero realm, ne robei), so the scout finds sessions by name.

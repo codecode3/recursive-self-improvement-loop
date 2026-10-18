@@ -13,7 +13,7 @@ The home is `~/antigravity-projects/RSI-session-retro/` (RSI below). `SPEC.md` t
 - **Lessons with workspace scope** (any project, not just this one) are marked `needs OK` and go to `~/antigravity-projects/AGENTS.md`. Project lessons go to the project's own rule files.
 - **--read-only** (also "read-only", "read only mode", "report only" or "don't change anything" in the prompt): see "Read-only mode".
 - **--goal "<text>"** (also "Goal: …" in the prompt): see stage 2 and the report format.
-- **--resume <run>:** pick up `RSI/runs/<run>/`. Retake the lock and start at the first stage whose output is missing: no `metrics.md` → stage 1, missing findings → stage 2, no `report.md` or no `Open after fixes: 0` in `checks/report-check.md` → stage 3, otherwise stage 4. If the human's message already names sets ("apply A and C"), that is the approval, so start at stage 5.
+- **--resume <run>:** pick up `RSI/runs/<run>/`. Retake the lock and start at the first stage whose output is missing: no `metrics.md` → stage 1, missing findings → stage 2, no `report.md` or no `Open after fixes: 0` in `checks/report-check.md` → stage 3, otherwise stage 4. If `report.md` already has `## Approved`: stage 5 for the sets with no commit in `applied.md`, stage 6 if every set has one and no re-check file ends `Open: 0`, else stage 7. If the human's message already names sets ("apply A and C"), that is the approval, so start at stage 5.
 - **--replay <commit>:** a test run on a scratch copy. See "Replay mode".
 - **--stage scout:** stop after stage 1.
 - **--run-dir <folder>:** put the run folder (and the lock) there instead of `RSI/runs/`. Only for replays and tests that must leave no files in any repo, never for a live read-only run.
@@ -23,7 +23,7 @@ The home is `~/antigravity-projects/RSI-session-retro/` (RSI below). `SPEC.md` t
 **Status:** the first line of `report.md` (of `metrics.md` for a scout-only run) is `Status: awaiting approval | applying | done | scout-only (asked to find logs) | stopped: <why>`. Rewrite it at every exit.
 
 **Agents:** `retro-scout`, `retro-analyst`, `retro-applier` and `retro-checker`, launched with the Agent tool, in the background. Never use general-purpose, claude or fork as a stand-in.
-- **Model and effort:** the user's latest standing setting (memory `subagent-model-effort.md`) wins over each agent's frontmatter. Pass `model` and `effort` on every Agent call, checkers included; the frontmatter is the fallback only when the memory names none. The final note's `Agents:` line records what ran, read from each agent's transcript (`grep -o '"model":"[^"]*"' <agent>.jsonl | sort -u`), not from what was requested.
+- **Model and effort:** the user's latest standing setting (memory `subagent-model-effort.md`) wins over each agent's frontmatter. Pass `model` and `effort` on every Agent call, checkers included; the frontmatter is the fallback only when the memory names none. The final note's `Agents:` line records what ran, read from each agent's transcript (`grep -oE '"(model|effort)":"[^"]*"' <agent>.jsonl | sort -u`), not from what was requested.
 - **A new or changed agent** usually appears by the next turn, not after a wait inside one; skills reload at once. If an agent is missing, start `sleep 15` with `run_in_background: true` and end your turn. When the notification arrives, check the agent list and launch. Try this for up to 3 turns. If it's still missing, stop, release the lock, and tell the human the agent hasn't loaded yet. Never tell them to open a new session, and never write that conclusion into a rule.
 
 ## Read-only mode
@@ -173,14 +173,14 @@ Print the goal verdict (if any), the report's "What went wrong" section and the 
    - `Pipeline:` lessons about the retro pipeline itself from this run, always including the scout's `Rule deviations:` line and any smoke-test lesson in `applied.md`, or "none";
    - the `Checks:` line.
    The `--resume` apply of an earlier read-only run moves that run's `ledger-entry.md` into `ledger.md` instead of adding a second entry. Any other run that commits `ledger.md` only lists that entry's pending sets under `## Open decisions`. Update `## Open decisions`: add each "Waiting on you" item, and close the ones this run decided.
-2. **Eval rows scored by live runs:** if the target notes' `## Evals` says a section is scored at this kind of run (the Slop eval's R section at each meta-retro), score it from `prompts.md`, add a Results row, and commit it on its own (`Retro <run>: eval R row`).
-3. **Release the lock.** Set `Status: done`, or keep `Status: awaiting approval` for a run that stopped before stage 5.
+2. **Eval rows scored by live runs:** if the target notes' `## Evals` says a section is scored at this kind of run (the Slop eval's R section at each meta-retro), score it from `prompts.md`, add a Results row, and commit it on its own (`Retro <run>: eval R row`). A run that stops before stage 5 skips this and writes the R score into its `ledger-entry.md` instead.
+3. **Release the lock.** If the run folder isn't under `RSI/runs/` and no `--run-dir` was given, set `Status: stopped: run folder outside runs/`. Otherwise set `Status: done`, or keep `Status: awaiting approval` for a run that stopped before stage 5.
 4. **Commit** the RSI repo's own changes: `ledger.md`, and `targets/` if you added notes. `runs/` is gitignored.
 5. **Claims:** any claim in the final note about files this run didn't commit ("already covered", "missing", "N of M exist") goes through the report-mode checker first, like `report.md` did. It writes `checks/claims-check.md`, and the note goes out only after its `## Main agent fixes` ends `Open after fixes: 0`.
 6. **Final note** in the terminal:
    ```markdown
    # Retro done: <target>
-   ## Run folder — <path> (under `RSI/runs/` unless `--run-dir` or `--replay`; otherwise say so and set `Status: stopped: run folder outside runs/`)
+   ## Run folder — <path> (if it isn't under `RSI/runs/` without `--run-dir`, say so; step 3 set `Status: stopped`)
    ## Goal verdict — <the report's 3 lines, if a goal was given>
    ## Sessions — <n> build sessions, <m> subagents (<ids, one line each>)
    ## Numbers — <headline>; projected <now> → <after> prompts

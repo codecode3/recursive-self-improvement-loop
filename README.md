@@ -6,7 +6,7 @@ There are no scripts. Every stage is done by agents through inference, so the pr
 
 Status: M1–M4 built and tested; M5 written, untested (no AGY/Codex target yet). Run `/retro <project>`. Design: [SPEC.md](SPEC.md). Agents and skill: `claude-config/` (live copies in `antigravity-projects/.claude/`). Test: `evals/slop-replay.md`, and the sync check in `targets/RSI-session-retro.md`.
 
-Options: `--read-only` (report only, no edits outside `runs/`), `--resume <run>` (pick up a stopped run at the approval step), `--goal "<text>"` (the report opens with a goal verdict). Saying "the RSI project" ("run the RSI project on AutoJob logs") also starts the skill.
+Options: `--read-only` (report only, no edits outside `runs/`), `--resume <run>` (pick up a stopped run at its first unfinished stage), `--goal "<text>"` (the report opens with a goal verdict). Saying "the RSI project" ("run the RSI project on AutoJob logs") also starts the skill.
 
 A new or changed agent appears at the next turn boundary, never in a new session; the skill's "Agents" paragraph has the retry steps.
 
