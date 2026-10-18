@@ -41,8 +41,8 @@ The human wants a report now and will approve later. "Read-only" means no change
    - Otherwise take the lock. Remove it at the end, and also if you stop early.
 3. **Other sessions:** run `ListAgents`. If another live session is editing this project's rule files, check its latest commits (`git log -5`). Avoid those files in stage 5, or message that session to split them.
 4. **Current session:** note its id, the newest `.jsonl` in `~/.claude/projects/<slug>/`. The scout must exclude it.
-5. **Unfinished business:** `grep -H '^Status:' RSI/runs/*/report.md RSI/runs/*/metrics.md`, plus the `## Open decisions` in `RSI/ledger.md`. Print this target family's runs that aren't `done` (with their resume line) and its open decisions in the stage-0 progress line.
-6. **`.claude/` copies:** if the target notes give a sync check (`--check`, or a `diff -q` one-liner), run it and note the result for stage 7.
+5. **Unfinished business:** `grep -H '^Status:' RSI/runs/*/report.md RSI/runs/*/metrics.md RSI/runs/*/ledger-entry.md`, plus the `## Open decisions` in `RSI/ledger.md`. Print this target family's runs that aren't `done` (with their resume line) and its open decisions in the stage-0 progress line.
+6. **Test and `.claude/` copies:** run the target notes' test command or sync check (`## Test command`, a `--check`, or a `diff -q` one-liner) and record the result in the lock. Run it again after stage 5 for the final note's "`.claude/` copies" count.
 
 ## 1. Scout
 

@@ -8,7 +8,7 @@
 The expected answers come from the manual retro of 2026-10-14: sessions `7fea9bc0` and `e2c48038`, and their subagents.
 
 **Scoring rules** (the key is everything from M1 to R below):
-- Score a run against the key as it stood at the run's start, and record that key's commit in the Results row (`key@<hash>`).
+- Score a run against the key as it stood at the run's start, and record that key's commit in the Results row (`key@<hash>`). If a later commit shows a start-key item was wrong, re-score that item on the corrected key and name both commits in the row.
 - Change the key only in its own commit, with a line saying why. Check: `git log -p 2f42403.. -- evals/slop-replay.md` shows no commit that changes both a key item and a Results row (8785532 did, before this rule).
 - After any pipeline fix found by a replay, the status is "fixes untested" until the next replay row.
 
