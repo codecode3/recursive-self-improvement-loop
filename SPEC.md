@@ -226,7 +226,7 @@ RSI-session-retro/
   SPEC.md, README.md
   lenses/*.md              one prompt per lens
   targets/<family>.md      per-project notes (aliases, repos, rule files, tests, forbidden actions)
-  claude-config/           git copy of the skill and agents below (edit live, then cp + diff)
+  claude-config/           git copy of the skill and agents below (edit live, then cp + diff; a self-target run edits here first)
   evals/slop-replay.md     expected answers for the Slop replay (section 9)
   runs/                    per-run output (gitignored: transcripts hold private data)
   ledger.md
@@ -303,6 +303,6 @@ Slop is the replay benchmark, because the manual run gives the expected answers.
 
 ## 10. Decisions (defaults chosen at build time; the human can change them)
 
-1. **`.claude/` edits:** appliers never edit live `.claude/` files. They hand the exact change to the main agent, which applies it after all the appliers finish. Claude Code's permission prompt on those edits is the human's check. Then the main agent syncs the git copy.
+1. **`.claude/` edits:** appliers never edit live `.claude/` files. They hand the exact change to the main agent, which applies it after all the appliers finish. Claude Code's permission prompt on those edits is the human's check. Then the main agent syncs the git copy. A retro of the pipeline itself works the other way round: it edits the copies and promotes them after stage 6 (the skill's "Self-target mode"), so the live files it runs on stay frozen.
 2. **Lessons for every project:** project lessons go to the project's own rule files. Lessons for the whole workspace are marked `needs OK` and go to `antigravity-projects/AGENTS.md`.
 3. **When to retro:** only when asked. Nothing offers `/retro` on its own yet.

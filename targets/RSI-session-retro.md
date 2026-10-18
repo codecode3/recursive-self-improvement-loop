@@ -1,6 +1,7 @@
 # Target notes: the retro pipeline (meta-retro)
 
 - **Family:** retro-pipeline.
+- **Self-target: yes.** A run on this target edits the `claude-config/` copies only and promotes them to live `.claude/` after stage 6 (the skill's "Self-target mode").
 - **Aliases** (a target named any of these uses this file):
   - rsi, RSI project, RSI-session-retro;
   - retro, retro pipeline.
@@ -28,7 +29,7 @@ For the scout's `Prompts per milestone:` line, one set per retro run: stages 1�
 - **Claude Code** (live, guarded) under `~/antigravity-projects/.claude/`:
   - `skills/retro/SKILL.md`;
   - `agents/retro-scout.md`, `agents/retro-analyst.md`, `agents/retro-applier.md`, `agents/retro-checker.md`.
-- **The 5 live↔copy pairs:** each live file `.claude/<f>` has a git copy `RSI-session-retro/claude-config/<f>`, for the 5 files above. Never edit the copies.
+- **The 5 live↔copy pairs:** each live file `.claude/<f>` has a git copy `RSI-session-retro/claude-config/<f>`, for the 5 files above. Never edit the copies, except in a run on this target (Self-target above).
 - **`.claude/` sync:** after editing a live file, from `~/antigravity-projects` run `cp .claude/<f> RSI-session-retro/claude-config/<f>`, then the check below, then commit only the copy paths.
 - **User memory:** `~/.claude/projects/-Users-me-antigravity-projects/memory/MEMORY.md` and the files it links, for example `rsi-session-retro.md`, `subagent-model-effort.md` and `one-shot-delivery.md`.
 

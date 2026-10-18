@@ -138,7 +138,7 @@ Print the goal verdict (if any), the report's "What went wrong" section and the 
    - the commit co-author line from your attribution instructions.
 4. **Cross-file requests:** appliers write the text they need in another set's files into their reports. When all of them are done, apply that text yourself, run the tests and commit (`Retro <run>: cross-set text`), before stage 6.
 5. **Apply the `.claude/` changes yourself.** Collect them from the appliers' reports and from sets marked "main agent applies". For each new or changed agent, skill or hook, in this order:
-   1. **Write** the live file under `.claude/`. Claude Code asks the human before each edit there, and that check is intended. Never write only the copy.
+   1. **Write** the live file under `.claude/`. Claude Code asks the human before each edit there, and that check is intended. Never write only the copy, except in "Self-target mode".
    2. **Parse** its frontmatter: name, description, plus tools and model for an agent.
    3. **Load:** confirm it's in your agents or skills list (an agent may need the next turn; see "Agents").
    4. **Smoke test:** done once, in stage 6 step 5, after the sync.
@@ -155,10 +155,10 @@ Print the goal verdict (if any), the report's "What went wrong" section and the 
    - the commit range: the HEAD from before stage 5, through HEAD;
    - every edit outside git, with its before/after text from `applied.md`.
    Open each check file. If it has no `Inventory:` line, or `Grepped only:` is anything but `none`, relaunch that checker once before using it.
-2. Apply their fixes yourself in one round, in the same files. A fix to a `.claude/` file or its `claude-config/` copy goes through stage 5 step 5 (live file first, then sync), never into the copy alone. Skip any fix that would undo an approved change, or that would change a standing user rule, and note it in `checks/fixes.md` with the reason. Run the tests, then commit (`Retro <run>: checker fixes`).
+2. Apply their fixes yourself in one round, in the same files. A fix to a `.claude/` file or its `claude-config/` copy goes through stage 5 step 5 (live file first, then sync), never into the copy alone, except in "Self-target mode". Skip any fix that would undo an approved change, or that would change a standing user rule, and note it in `checks/fixes.md` with the reason. Run the tests, then commit (`Retro <run>: checker fixes`).
 3. **Re-check:** launch one more `retro-checker` in re-check mode (`checks/checker-3.md`) with both reports, `fixes.md` and the fix commit. Pass = 0 open issues of any kind, each skip with a reason in `fixes.md`, and each item that needs the human in "Waiting on you". Fix anything it finds the same way, and confirm each of those fixes in `fixes.md` with the `grep`/`sed -n` line that shows the new text. Run a fourth checker only if the re-check found a contradiction. When the pass holds (the last checker ends `Open: 0`, or each of its issues is confirmed in `fixes.md`), end `fixes.md` with the line `Stage 6 passed`.
 4. **Enforceability:** confirm the checkers found no rule without a check. If they did, fix it in that same round.
-5. **Smoke test:** for each `.claude/` agent, skill or hook that was added or changed:
+5. **Smoke test:** for each `.claude/` agent, skill or hook that was added or changed (in "Self-target mode", after promotion):
    - Confirm the file's frontmatter parses: name, description, tools, model.
    - Confirm it appears in your available agents or skills (see "Agents" for a new one).
    - Run it once on a task with no side effects, such as a dry run or a read-only check of one item. If it hasn't appeared yet, or no safe task exists, add the exact test prompt to "Waiting on you".
@@ -204,6 +204,16 @@ Replay mode tests the pipeline against a project whose answers are already known
 4. Don't ask the approval question. Apply every set that isn't `needs OK`, and say so in the final note.
 5. Then score the run against the eval file the notes name (`RSI/evals/…`), using the key as it stood when the run started: write `<run folder>/score.md`, with each expected item marked hit or missed.
 6. **Fixes to the pipeline itself** that the replay turns up (SKILL, agents, lenses, SPEC): apply them, then run stage 6 on them (two checkers on the commit range, then the re-check) before reporting. The eval's status stays "fixes untested" until the next replay row.
+
+## Self-target mode (the retro pipeline itself)
+
+When the target notes say `Self-target: yes` (`targets/RSI-session-retro.md`), the run changes the skill and agents it is running on. The live `.claude/` files are the version this run started with and the version every other session uses, so they stay frozen until the run's changes pass stage 6:
+1. **Edit the copy only.** Stage 5 step 5 and every stage 6 fix to a skill or agent write `RSI/claude-config/<f>`, never `.claude/<f>`. Of the step 5 recipe, keep Parse and Commit; Load, Sync and the smoke test wait for promotion.
+2. **Checkers read the copies.** Stage 6 checkers get the `claude-config/` files as the skill and agent files, and are told the live ones are the frozen pre-run version.
+3. **Test command:** until promotion, a `STALE` line for a file this run changed is expected. Any other failure counts.
+4. **Promote** after `Stage 6 passed`: for each changed file, write `.claude/<f>` from `claude-config/<f>` with the Write tool, not `cp` through Bash (Claude Code's prompt for `.claude/` edits is the human's check). Then the test command must print `OK: 5 files parse, live == copy`, the files must load (see "Agents"), and stage 6 step 5's smoke test runs on them.
+5. **Roll back** a file whose smoke test fails: restore `git show <pre-run HEAD>:claude-config/<f>` onto both the live file and the copy, commit the copy, and list it under "Waiting on you".
+6. Add `promoted: <files>, smoke ok | rolled back: <files>` to `applied.md`, and put it in the final note's Checks line. The promoted version is untested on the Slop replay until its next Results row, so the final note offers `/retro slop --replay a9bcb34` under "Waiting on you".
 
 ## Other log sources
 
