@@ -4,7 +4,7 @@
 
 **No scripts.** Agents do every stage by inference. They read the transcripts with ordinary shell commands and one-off parsing, the way the manual Slop retro did. The project is made of prompts only: one skill, four agents and the lens prompts.
 
-Status: M1–M5 built on 2026-10-14 (the skill, 4 agents, 7 lenses, target notes, the Slop eval). The Slop replay passed M1–M4 the same day, and its 10 pipeline fixes are applied. Results are in `evals/slop-replay.md`. Times are Central.
+Status: M1–M4 built and tested; M5 written, untested (no AGY/Codex target yet). The skill, 4 agents, 7 lenses, target notes and the Slop eval date from 2026-10-14. The Slop replay's 10 pipeline fixes are applied, and its results are in `evals/slop-replay.md`. The end-of-project offer is dropped (§10.3). Times are Central.
 
 ---
 
@@ -15,7 +15,7 @@ Status: M1–M5 built on 2026-10-14 (the skill, 4 agents, 7 lenses, target notes
 | Human prompts | 33 across 2 parallel sessions | **≤ 3**: start, approve, optional follow-up |
 | Wall time | 5:35–6:53 pm (78 min), with the human steering throughout | ≤ 30 min, unattended except the approval |
 | Subagents launched by hand | 13 (8 read logs; 5 applied fixes or checked guides) | 0. The pipeline launches them itself |
-| Contradictions left in the guides | Several, found by later manual passes | 0 after the built-in check |
+| Open issues left in the guides | Several, found by later manual passes | 0 after the built-in check |
 | Findings | The reference set (section 9) | ≥ 80% recall of the manual findings on the Slop replay |
 
 A run is done when its fixes are committed, its checks have passed and the human has received one organized note.
@@ -70,19 +70,27 @@ The skill tells agents where each runtime keeps its logs. The agents work out th
 ```
  /retro <target>
       │
-  0 Lock ──── another retro on this target? → message it / stop          [main agent]
+  0 Start ─── lock; list open runs and decisions; resume?                 [main agent]
   1 Scout ─── find sessions, measure, label every human prompt            [retro-scout]
   2 Analyze ─ 5 fixed lenses + up to 3 hotspot lenses, read-only          [retro-analyst ×N]
   3 Synthesize ─ dedupe, check against existing rules, rank, group        [main agent]
+    + report check: re-run every citation and number                      [retro-checker]
   4 Approve ─ ONE question: which change sets to apply                    [human]
   5 Apply ─── one applier per change set, disjoint files, commit own paths[retro-applier ×≤3]
-  6 Verify ── contradictions ×2, enforceability check, smoke tests, tests [retro-checker ×2]
+  6 Verify ── checks ×2 + re-check, enforceability, smoke tests, tests    [retro-checker ×3]
   7 Report ── organized note + ledger entry + push notification           [main agent]
 ```
 
 The scout keeps the raw transcripts out of the main agent's context, so the main agent stays light enough to synthesize. After each stage, the main agent prints one line: `Retro: 1/7 scouted — 112 prompts, 10 h 28 m`.
 
 ## 5. Stages in detail
+
+### 0. Start
+- **Routing.** `/retro <target>`, a retro or post-mortem request, "find the RSI project", "use/run the RSI project on <X> logs", or "RSI" with a project or logs all start the skill. A bare "find the RSI project" gets one location line plus "Which project's logs?" in the same reply.
+- **Arguments.** `--read-only` (also "read-only" or "report only" in the prompt; see §8), `--goal "<text>"` (also "Goal:" in the prompt), `--resume <run>`, `--stage scout`, `--replay <commit>`, `--since <date>`, and `--run-dir <folder>`. `--run-dir` is only for replays and tests. Every other run keeps its folder and lock in `runs/` (gitignored), so other sessions can see the lock.
+- **Run status.** The first line of `report.md` (of `metrics.md` for a scout-only run) is `Status: awaiting approval | scout-only (asked to find logs) | applying | done | stopped: <why>`. Every exit updates it. A scout-only run doesn't create empty `findings/` and `checks/` folders. Check: `grep -H '^Status:' runs/*/report.md runs/*/metrics.md`.
+- **Open runs and decisions.** Stage 0 runs that grep and lists every run of the target that isn't `done`, plus the target's items under `## Open decisions` in `ledger.md`.
+- **Resume.** `--resume <run>` starts at stage 4 from that run's `report.md`. A reply that names sets for an `awaiting approval` run ("apply A and C") counts as its approval.
 
 ### 1. Scout
 One `retro-scout` agent. It does today's first three manual steps in one pass and writes three files to `runs/<target>-<date>/`.
@@ -107,7 +115,7 @@ The scout asks a question only when it can't tell whether a session belongs.
 - It excludes tool results, `isMeta` lines, compaction summaries, slash commands and their output, `<task-notification>`, `[Request interrupted…`, and system reminders.
 - Pasted text counts as a prompt and is marked as pasted.
 
-Queued prompts (typed while the agent works, stored as `queued_command` attachments) count too and are marked as queued. On Slop this rule gives 112 typed prompts plus 13 queued, 125 in all. The manual count said 111 because it dropped one pasted-only prompt and every queued one. The scout reports:
+Queued prompts (typed while the agent works, stored as `queued_command` attachments) count too and are marked as queued. A queued line counts only if its text doesn't start with `<`. Machine lines (`<agent-message>`, `<cross-session-message>`, …) are dropped and named in the headline's `(+n machine queued dropped: …)` tail. On Slop this rule gives 112 typed prompts plus 13 queued, 125 in all. The manual count said 111 because it dropped one pasted-only prompt and every queued one. The scout reports:
 - prompts per session and in total;
 - wall time from first to last prompt;
 - time the human waited versus time the agent worked;
@@ -116,7 +124,9 @@ Queued prompts (typed while the agent works, stored as `queued_command` attachme
 - **correction loops:** the same subject in N separate rounds, for example Juno's look in 8 subagent rounds plus 17 more requests in a side session;
 - **repeats:** the same ask made twice, for example "spine too long" at 1:17 pm and again in the evening;
 - status checks and nudges ("keep going", "are you done?");
-- the top 1–3 hotspot subjects for stage 2.
+- the top 1–3 hotspot subjects for stage 2;
+- `Prompts per milestone:` (the family's milestones from the target notes, for example lyrics OK, take picked, first cut, final), so predictions compare at the same stage;
+- `Rule deviations:` any place it had to step outside the counting rule, or "none".
 
 **Label every prompt → `prompts.md`.** One row per prompt with its time, session, text (shortened), plus:
 - a **category**: decision, creative edit, correction, repeat correction, nudge, status check, open/show request, steering ("use N subagents", "list 100"), environment fix, rule-setting, question, or noise;
@@ -146,6 +156,10 @@ Each finding follows this format, as a section in `findings/<lens>.md`:
 - **Cost:** prompts it took, and prompts the fix would save
 - **Proposal:** the kind (rule, check, hook, agent, skill, form field or memory), the files, the change, and how the change will be checked
 - **Confidence**, whether it **changes a standing user rule**, and its **scope** (this project or the whole workspace)
+- **Depends on:** each outside fact the proposal needs (an API, a tool's behavior), with `source: <doc URL or file:line>` or `unverified`. An unverified fact is labelled in the change-set line and can't be the headline lever. If it changes how the human said they want the work done, the item is `needs OK`.
+- **Goal impact:** only in a goal-led run, with its arithmetic.
+
+**Goal-led runs** (`--goal`): the main agent writes `runs/<run>/brief.md` (the quoted goal, the scout's baseline for it, paths and limits) and gives it to every analyst. A goal may add one hotspot but never replaces one from the scout's Hotspots line.
 
 At most 4 analysts run at once, all in the background. Each one writes only its own findings file.
 
@@ -159,10 +173,12 @@ The main agent:
 3. Ranks by prompts saved × confidence, and prefers editing an existing rule over adding a new one.
 4. Groups the findings into **at most 3 change sets with disjoint file ownership**.
 
-Output: `report.md` in the organized note format the human asked for.
+Output: `report.md` in the organized note format the human asked for. Every R-item has a `Covered now:` field: `file:line "quote"`, or `none (grep …)`. In a goal-led run the report opens with `## Goal verdict`: reachable or not, the main bottleneck with its number, and the change set that moves it.
+
+**Report check.** Before stage 4, one `retro-checker` in report mode re-runs every citation and recomputes the headline numbers. It writes `checks/report-check.md`, which must end `Wrong: 0` before the question goes out. The same claims mode covers any "already covered / missing / N of M" claim in a final note or an ad-hoc answer.
 
 ### 4. Approve (the only required human step)
-The pipeline asks one AskUserQuestion with multi-select. Each option is a change set and its description gives the files and the prompts it would save. The default is all sets that don't change a standing rule. Rule changes are listed separately and need an explicit tick.
+The pipeline asks one AskUserQuestion with multi-select. Each option is a change set and its description gives the files and the prompts it would save. The default is all sets that don't change a standing rule. Rule changes are listed separately and need an explicit tick. Any ledger decision open across 2 or more runs is offered as a `needs OK` option. A read-only run adds the option "None now, keep it read-only".
 
 ### 5. Apply
 The pipeline launches one `retro-applier` per approved change set, all in one message and in the background. Each applier:
@@ -170,29 +186,36 @@ The pipeline launches one `retro-applier` per approved change set, all in one me
 - runs the project's test command if it has one, and commits only its own paths (`git add <paths>`), never pushes;
 - **has no side effects:** no renders, deploys, browser use, applications or network calls (lesson 12);
 - **handles `.claude/` through the project's sync pattern** (lesson 13). Live files stay real files in `.claude/`, the repo keeps a copy, and a drift test fails when the two differ. For music videos that is `music-videos/tools/sync_claude_config.py`.
+- **resolves its own references** before committing, and reports `Refs checked: <n>`.
 
 ### 6. Verify
-- **Contradictions:** two independent `retro-checker` agents read the project's whole rule set, not just the edited files. They report conflicts and repeated rules with exact line fixes. The main agent applies the fixes in one round and commits them.
+- **Checks:** two independent `retro-checker` agents read the project's whole rule set, not just the edited files. Each first takes a four-part inventory (references, repeated numbers, standing rules, every hunk) and writes `Inventory: … Read in full: … Grepped only: none`. They report conflicts, repeated rules and any other issue with exact line fixes. The main agent applies the fixes in one round and commits them.
+- **Re-check:** one more `retro-checker` reads the files the fixes touched, plus the files that point into them. Pass = 0 open issues of any kind, not only contradictions.
 - **Enforceability:** the checkers also confirm that every rule added or changed names its check, such as a command, hook, test or required report field. "Stop after 20 minutes" fails unless it says to run `date` at the start of each round.
-- **Smoke test:** each new or changed agent, skill or hook runs once on a tiny task that has no side effects (a dry run or read-only job). If no safe task exists, the item goes on the "waiting on you" list.
+- **Smoke test:** each new or changed agent, skill or hook runs once on a tiny task that has no side effects (a dry run or read-only job). A new or changed agent appears at the next turn boundary: end the turn with a background `sleep 15` and check again when it returns, up to 3 turns. Never conclude that a new session is needed. If no safe task exists, the item goes on the "waiting on you" list.
 - **Tests:** the project's tests pass, if it has any.
 
 ### 7. Report and ledger
-- **The note** has four parts:
+- **The note** has these parts:
+  - `## Goal verdict` first, in a goal-led run;
   - sessions found;
   - the numbers;
   - what changed (commit hashes and one line each);
-  - waiting on you.
+  - waiting on you, with the `--resume` command when the run is `awaiting approval`;
+  - `Checks:` counts per checker (found, fixed, skipped, open), and `Agents:` the model and effort each kind of agent ran with;
+  - `.claude/ copies: in sync (<n>)`, from the drift check in the target notes.
 
-  It is printed in the terminal and sent as a push notification on finish.
-- **The ledger:** one entry is appended to `ledger.md` with the target, its family, the key numbers, accepted proposals with their predicted savings, and the commits.
+  It is printed in the terminal and sent as a push notification on finish. A read-only run prints it too.
+- **The ledger:** one entry per run is appended to `ledger.md`, in the format at the top of that file: status, the key numbers, accepted proposals with scoped predictions and commits, a `Pipeline:` line for lessons about the pipeline itself, and the `Checks:` line. Every "waiting on you" item goes under `## Open decisions` there, and is closed with its answer when decided.
+- **Early stops.** A run that stops before stage 5 (read-only, or no set picked) writes `<run>/ledger-entry.md` with `Status: proposed, not applied` and makes no commit. Stage 0 and the `followup` lens read these files. The next run that commits the ledger (the `--resume` apply, or any later run) moves the entry into `ledger.md` and its pending items under `## Open decisions`.
 
 ## 6. The recursive part
 
-Every retro after the first adds a **`followup` lens**. It reads the ledger entries of earlier projects in the same family (for example every music video) and checks each accepted lesson:
+Every retro after the first adds a **`followup` lens**. It reads the ledger entries of earlier projects in the same family (for example every music video), the `runs/*/ledger-entry.md` files marked `Status: proposed, not applied`, the `Pipeline:` items of every family, and the open decisions. It checks each lesson:
 - **Held:** the correction never came back. The lesson gets a `held ×N` tag.
 - **Failed:** the same correction showed up again. The lesson is escalated one step: text rule → required report field → test or hook. If it fails twice, the report says so at the top.
-- **Prediction accuracy:** predicted prompt savings are compared with the actual drop, and later runs adjust their estimates by that ratio.
+- **Prediction accuracy:** predicted prompt savings are compared with the actual drop at the same milestone and scope, and later runs adjust their estimates by that ratio.
+- **Open decisions:** a decision open across 2 or more runs is a finding, and stage 4 offers it again.
 
 Rule hygiene: the synthesizer has a rule budget per guide. A retro that adds rules to a full guide must merge or delete others to make room.
 
@@ -213,13 +236,13 @@ These live where the workspace expects them, `antigravity-projects/.claude/`, be
 
 | File | Model / effort | Tools |
 |---|---|---|
-| `skills/retro/SKILL.md` (`/retro <target>`, or "find the logs for X and figure out what went wrong"): the pipeline, log locations, the prompt-counting rule | main session | — |
+| `skills/retro/SKILL.md` (`/retro <target>`, "find the logs for X and figure out what went wrong", or "run the RSI project on X"; see §5.0): the pipeline, log locations, the prompt-counting rule | main session | — |
 | `agents/retro-scout.md` | claude-opus-5-5 / medium | Read, Bash, Write (run folder only) |
 | `agents/retro-analyst.md` | claude-opus-5-5 / medium | Read, Bash, Write (its findings file only) |
 | `agents/retro-applier.md` | claude-opus-5-5 / medium | Read, Edit, Write, Bash |
 | `agents/retro-checker.md` | claude-sonnet-5-5 / medium | Read, Bash |
 
-Models and effort are set in each agent's frontmatter. The first real run checks the transcripts to confirm they took effect. The general-purpose agent is never used.
+Retro agents, checkers included, follow the user's latest standing model/effort setting (memory `subagent-model-effort.md`). It is passed on every Agent call. The frontmatter above is the fallback when the memory names none. The final note's `Agents:` line records what ran. The general-purpose agent is never used.
 
 **Per-project notes:** `targets/<family>.md` (or a `retro.md` in the project), found by the target's name or alias. The scout and analysts read it first. It lists:
 - **Aliases** (for music videos: slop, hello tomorrow, frutiger aero realm, ne robei), so the scout finds sessions by name.
@@ -243,11 +266,20 @@ Without the file, the agents use the project's `CLAUDE.md` and `docs/` and work 
   - Hidden-text traps are reported, never decoded (workspace rule).
 - **No secrets in lessons.** Evidence quotes are the human's prompts and short assistant excerpts, never tool results that may hold tokens, emails or passwords.
 - **Read-only until approval.** Stages 1–3 write only inside `runs/`.
+- **Read-only mode** (`--read-only`, or "read-only" / "report only" in the prompt) runs stages 0–4 and applies nothing:
+  - the run folder and lock stay in `runs/` (gitignored, so not a repo change), never the scratchpad;
+  - it still asks the ONE question, with the extra option "None now, keep it read-only". A picked set is the human's approval and ends read-only;
+  - if nothing is picked, it writes `<run>/ledger-entry.md` (`Status: proposed, not applied`), sets `report.md` to `Status: awaiting approval`, and makes no commit;
+  - it still prints the stage-7 final note.
+
+  Check: the final note names the run folder, and stage 7 fails if it isn't under `runs/` without `--run-dir`.
 - **No focus stealing and no windows.** Everything runs headless and in the background.
 
 ## 9. Build milestones and acceptance tests
 
-Slop is the replay benchmark, because the manual run gives the expected answers. Every milestone is prompt files only.
+Slop is the replay benchmark, because the manual run gives the expected answers. Every milestone is prompt files only. A milestone is "built" only when its acceptance test has a result row in `evals/`. A run is scored against the eval key as it stood at the run's start, and a key changes only in its own commit.
+
+**Building or extending the pipeline.** A spec or milestone list ends with ONE batched go-ahead: "Build M1–Mn and run the replay, scratch only?" On yes, build everything, run the replay and report once, with no stop between milestones. Pipeline fixes found by a replay go through stage 6 before they are reported. New or changed agents load as in the §5.6 smoke test: a background `sleep 15` and a retry next turn, never a new session. Check: the eval rows in `evals/` count the build's go-ahead prompts (at most 2).
 
 | Milestone | Builds | Accepted when |
 |---|---|---|
