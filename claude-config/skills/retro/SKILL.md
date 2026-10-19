@@ -8,7 +8,7 @@ description: Automated retro of a finished project from its Claude Code session 
 The home is `~/antigravity-projects/RSI-inner-loop-outer-loop/` (RSI below; the old path `RSI-session-retro` is a symlink to it). `SPEC.md` there explains the design. You don't need to read it to run a retro. **The human types one prompt to start and answers one question.** Everything else is yours: no "are you done?", no "spawn N agents", no "anything else?".
 
 **Arguments:** `/retro <target> [--since <date>] [--read-only] [--goal "<text>"] [--resume <run>] [--replay <commit>] [--stage scout] [--run-dir <folder>]`
-- **target:** a project name or path. Its notes are the file in `RSI/targets/` whose Aliases line lists the target (`grep -il "<target>" RSI/targets/*.md`), or `retro.md` in the project. If neither exists, use the project's `CLAUDE.md` and `docs/`. Then write a short targets file yourself in stage 7, following `RSI/targets/music-videos.md`.
+- **target:** a project name or path. Its notes are the file in `RSI/targets/` whose Aliases line lists the target (`for f in RSI/targets/*.md; do awk '/\*\*Aliases/{a=1;next} /^- \*\*/{a=0} a' "$f" | grep -qiw -- "<target>" && echo "$f"; done`; exactly one file must print), or `retro.md` in the project. If neither exists, use the project's `CLAUDE.md` and `docs/`. Then write a short targets file yourself in stage 7, following `RSI/targets/music-videos.md`.
 - **A bare "find the RSI project"** (no target): give the location in one line, list the runs that aren't `done` (stage 0 step 5), and ask "Which project's logs?" in the same reply. Don't list the repo contents.
 - **Lessons with workspace scope** (any project, not just this one) are marked `needs OK` and go to `~/antigravity-projects/AGENTS.md`. Project lessons go to the project's own rule files.
 - **--read-only** (also "read-only", "read only mode", "report only" or "don't change anything" in the prompt): see "Read-only mode".
@@ -35,7 +35,7 @@ The human wants a report now and will approve later. "Read-only" means no change
 
 ## 0. Lock and set up
 
-1. **Run id:** `<target>-<YYYY-MM-DD>`, plus `-replay` in replay mode, plus `-2`, `-3` if the folder already exists. Run folder: `RSI/runs/<run>/` (or `--run-dir`), holding `tmp/`. Create `findings/` in stage 2 and `checks/` when the first check runs, so a scout-only run doesn't look unfinished. Print `Run folder: <path>`.
+1. **Run id:** `<target>-<YYYY-MM-DD>`, where `<target>` here and in the lock is the notes file's base name (`RSI-inner-loop-outer-loop`, `music-videos`), not the alias that was typed; with no notes file, the project folder name. Older runs may carry an old name (`RSI-session-retro-*`), so step 5 matches runs to a family by the ledger heading's `(<family>)` or the run's notes, not by the folder prefix; plus `-replay` in replay mode, plus `-2`, `-3` if the folder already exists. Run folder: `RSI/runs/<run>/` (or `--run-dir`), holding `tmp/`. Create `findings/` in stage 2 and `checks/` when the first check runs, so a scout-only run doesn't look unfinished. Print `Run folder: <path>`.
 2. **Lock:** `RSI/runs/<target>.lock` holds the session id and start time.
    - If the lock exists and is under 3 hours old, another retro is on this target. Run `ListAgents`. If a live session matches, message it with SendMessage and stop.
    - Otherwise take the lock. Remove it at the end, and also if you stop early.

@@ -8,7 +8,7 @@ effort: medium
 
 You are the scout for one retro. Your prompt gives:
 - the **target** (a name, plus the project path if known),
-- the **target notes** file (`RSI-inner-loop-outer-loop/targets/<target>.md` or the project's `retro.md`), if any,
+- the **target notes** file (the `RSI-inner-loop-outer-loop/targets/*.md` file whose Aliases line lists the target, or the project's `retro.md`), if any,
 - the **run folder** (`RSI-inner-loop-outer-loop/runs/<run>/`), where your three files go,
 - the session ids to **exclude** (the session that launched you, and any retro sessions it already knows about),
 - an optional **since** date: sessions whose last human prompt is before it are `excluded`.

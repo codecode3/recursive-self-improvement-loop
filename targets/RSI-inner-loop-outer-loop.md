@@ -11,6 +11,7 @@
 
 - **Rules repo:** `~/antigravity-projects/RSI-inner-loop-outer-loop`, a git repo on main. `runs/` is gitignored.
 - **Session logs:** `~/.claude/projects/-Users-me-antigravity-projects/`. For this target, retro-run sessions ARE the target, so don't exclude them. Exclude only the launching session.
+- **Old path:** `RSI-session-retro` (renamed 2026-10-18, now a symlink). Sessions before the rename, and any session that enters through the symlink, show it in `cwd` and tool paths, so the scout's cwd and files signals grep for both `RSI-inner-loop-outer-loop` and `RSI-session-retro`. Check: the scout's `sessions.md` lists 5c14025c as `build`.
 
 ## Session kinds
 

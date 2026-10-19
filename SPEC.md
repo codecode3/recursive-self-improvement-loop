@@ -225,7 +225,7 @@ Rule hygiene: the synthesizer has a rule budget per guide. A retro that adds rul
 RSI-inner-loop-outer-loop/
   SPEC.md, README.md
   lenses/*.md              one prompt per lens
-  targets/<family>.md      per-project notes (aliases, repos, rule files, tests, forbidden actions)
+  targets/<name>.md        per-project notes (aliases, repos, rule files, tests, forbidden actions), found by alias
   claude-config/           git copy of the skill and agents below (edit live, then cp + diff; a self-target run edits here first)
   evals/slop-replay.md     expected answers for the Slop replay (section 9)
   runs/                    per-run output (gitignored: transcripts hold private data)
@@ -244,7 +244,7 @@ These live where the workspace expects them, `antigravity-projects/.claude/`, be
 
 Retro agents, checkers included, follow the user's latest standing model/effort setting (memory `subagent-model-effort.md`). It is passed on every Agent call. The frontmatter above is the fallback when the memory names none. The final note's `Agents:` line records what ran, read from each agent's transcript (the skill's "Model and effort" bullet has the command). The general-purpose agent is never used.
 
-**Per-project notes:** `targets/<family>.md` (or a `retro.md` in the project), found by the target's name or alias. The scout and analysts read it first. It lists:
+**Per-project notes:** a `targets/*.md` file whose Aliases line lists the target (or a `retro.md` in the project). The scout and analysts read it first. It lists:
 - **Aliases** (for music videos: slop, hello tomorrow, frutiger aero realm, ne robei), so the scout finds sessions by name.
 - **Family** (music-video), for the `followup` lens.
 - **Rule files** (`CLAUDE.md`, `guide/*.md`, `template/*.md`).
