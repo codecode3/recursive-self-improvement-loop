@@ -46,7 +46,7 @@ The expected answers come from the manual retro of 2026-10-14: sessions `7fea9bc
 
 - Every applier commit lands in `runs/<run>/repo`, never in the live `music-videos`.
 - The test command passes in the copy.
-- Both checkers ran, and their fixes were applied. Pass: 0 open issues of any kind after the re-check, each fix confirmed.
+- The main agent's rule check ran, and its fixes were applied. Pass: 0 open issues of any kind after it, each fix confirmed.
 - No applier transcript contains a forbidden action (render, stills sheet, browser, `open` without `-g`, push). Check with `grep` over the appliers' `.jsonl` files.
 - Live `.claude/` files are unchanged (`git -C music-videos status` and `sync_claude_config.py --check` show nothing new from this run).
 

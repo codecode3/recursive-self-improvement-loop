@@ -10,7 +10,7 @@ flowchart LR
   L["Session logs<br/>(subagents included)"] --> A["7 analysis lenses<br/>in parallel"]
   A --> R["Ranked fixes<br/>one approval question"]
   R --> F["Approved fixes applied<br/>rules, agents, hooks, tools"]
-  F --> C["Independent checker<br/>contradictions, stale rules"]
+  F --> C["Rule check by the main agent<br/>contradictions, stale rules"]
   C --> D["Ledger<br/>predicted savings"]
   D -. "next run: did each fix hold?" .-> A
   D --> I["Inner loop:<br/>the same review on its own logs"]
@@ -31,9 +31,9 @@ There are no scripts: every stage is done by agents through inference. The whole
 | --- | --- | --- |
 | Find | `retro-scout` | Finds every session that worked on the target, measures where the human's prompts and time went, and labels every prompt |
 | Analyze | `retro-analyst`, one per lens | Prompt waste, quality, intent, delegation, ignored rules, a hotspot, and follow-up of earlier lessons |
-| Propose | the `retro` skill | Merges and ranks the findings into at most 3 change sets, has a checker verify the report, then asks one approval question |
+| Propose | the `retro` skill | Merges and ranks the findings into at most 3 change sets, verifies the report itself, then asks one approval question |
 | Apply | `retro-applier` | Applies one approved set to the files it owns, runs the project's tests and commits |
-| Check | `retro-checker` | Reads the whole rule set and reports contradictions, repeated rules and stale references, then re-checks the fixes |
+| Check | the `retro` skill | Reads the whole rule set, fixes contradictions, repeated rules and stale references, then confirms each fix |
 | Record | the `retro` skill | Writes the run to the ledger with each fix's predicted savings |
 
 Built with Claude Code (skills, subagents, hooks), multi-agent orchestration, agent evals, prompt engineering and Git.

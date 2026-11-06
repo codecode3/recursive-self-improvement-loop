@@ -12,7 +12,7 @@ Entry format:
   - R1. <title>: predicted: <n> prompts to <milestone>, <scope>; <repo>@<commit>
 - Escalated: <lessons that failed again, and what they became>
 - Pipeline: <lessons about the pipeline itself, or none>
-- Checks: <per checker: found, fixed, skipped, open>
+- Checks: <found, fixed, skipped, open>
 ```
 
 A prediction names its milestone and scope, for example `predicted: 3 prompts to first cut, all target sessions incl. side sessions`, so the next run compares like with like.
@@ -26,7 +26,7 @@ Format: `- [<run>] <item>, asked <date>; status open | closed <date>: <answer>`
 - [slop replay, 5c14025c] The music-videos guide fixes the Slop replay found and the live guides still lack, proposed 2026-10-14 21:38 and never answered: the CLAUDE.md standing list, a setup-form split field, a known-bugs section plus a `Rendered:` line, an 8/10 stopping bar, a take-switch impact table, a BrowserOS fallback, optional `lint_geometry.py`, compaction re-inject and backlog Stop hooks; needs OK: a hero sign-off stop (memory `rsi-session-retro.md`, "Still missing, proposed to the user and NOT applied"), asked 2026-10-14; status open.
 - [captcha-2026-10-15] Ban `fork` as a missing-agent fallback workspace-wide and in the music-video guides (HANDOFF "Open" 1), asked 2026-10-15; status closed 2026-10-18: not banned outside the retro skill (which already bans it for retro agents, `SKILL.md` "Agents"). R10's wait-a-turn retry makes the fallback rare, and the user left the call to the main agent.
 - [autojob-2026-10-18] Sets A, B, C and N1–N4 from `runs/autojob-2026-10-18/report.md`, asked 2026-10-18; status open. Resume: `/retro autojob --resume autojob-2026-10-18`.
-- [RSI-session-retro-2026-10-18] Confirm the clause added inside the approved N2 (workspace AGENTS.md "Rule edits get one independent check": "plus the before/after text of any edited file outside git (this AGENTS.md, memory)"), asked 2026-10-18; status open.
+- [RSI-session-retro-2026-10-18] Confirm the clause added inside the approved N2 (workspace AGENTS.md "Rule edits get one independent check": "plus the before/after text of any edited file outside git (this AGENTS.md, memory)"), asked 2026-10-18; status closed 2026-11-05: moot, the user had `retro-checker` retired and that AGENTS.md rule deleted, in every session.
 
 ## captcha-2026-10-15 (music-video)
 - Status: done

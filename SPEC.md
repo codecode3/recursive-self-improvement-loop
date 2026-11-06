@@ -74,10 +74,10 @@ The skill tells agents where each runtime keeps its logs. The agents work out th
   1 Scout ─── find sessions, measure, label every human prompt            [retro-scout]
   2 Analyze ─ 5 fixed + up to 3 hotspot (+1 for a goal), read-only          [retro-analyst ×N]
   3 Synthesize ─ dedupe, check against existing rules, rank, group        [main agent]
-    + report check: re-run every citation and number                      [retro-checker]
+    + report check: re-run every citation and number                      [main agent]
   4 Approve ─ ONE question: which change sets to apply                    [human]
   5 Apply ─── one applier per change set, disjoint files, commit own paths[retro-applier ×≤3]
-  6 Verify ── checks ×2 + re-check, enforceability, smoke tests, tests    [retro-checker ×3]
+  6 Verify ── rule check + confirm, enforceability, smoke tests, tests    [main agent]
   7 Report ── organized note + ledger entry + push notification           [main agent]
 ```
 
@@ -175,7 +175,7 @@ The main agent:
 
 Output: `report.md` in the organized note format the human asked for. Every R-item has a `Covered now:` field: `file:line "quote"`, or `none (grep …)`. In a goal-led run the report opens with `## Goal verdict`: reachable or not, the main bottleneck with its number, and the change set that moves it.
 
-**Report check.** Before stage 4, one `retro-checker` in report mode re-runs every citation and recomputes the headline numbers. It writes `checks/report-check.md`, ending `Wrong: <n>`. The main agent fixes each wrong claim and appends `## Main agent fixes`, ending `Open after fixes: 0`, before the question goes out. The same claims mode covers any "already covered / missing / N of M" claim in a final note or an ad-hoc answer.
+**Report check.** Before stage 4, the main agent itself re-runs every citation and recomputes the headline numbers. It fixes each wrong claim and writes `checks/report-check.md`, one line per wrong claim, ending `Open after fixes: 0`, before the question goes out. The same check covers any "already covered / missing / N of M" claim in a final note or an ad-hoc answer.
 
 ### 4. Approve (the only required human step)
 The pipeline asks one AskUserQuestion with multi-select. Each option is a change set and its description gives the files and the prompts it would save. The default is all sets that don't change a standing rule. Rule changes are listed separately and need an explicit tick. Any ledger decision open across 2 or more runs is offered as a `needs OK` option. A read-only run adds the option "None now, keep it read-only".
@@ -189,9 +189,9 @@ The pipeline launches one `retro-applier` per approved change set, all in one me
 - **resolves its own references** before committing, and reports `Refs checked: <n>`.
 
 ### 6. Verify
-- **Checks:** two independent `retro-checker` agents read the project's whole rule set, not just the edited files. Each first takes a four-part inventory (references, repeated numbers, standing rules, every hunk) and writes `Inventory: … Read in full: … Grepped only: none`. They report conflicts, repeated rules and any other issue with exact line fixes. The main agent applies the fixes in one round and commits them.
-- **Re-check:** one more `retro-checker` reads the files the fixes touched, plus the files that point into them. Pass = 0 open issues of any kind, not only contradictions.
-- **Enforceability:** the checkers also confirm that every rule added or changed names its check, such as a command, hook, test or required report field. "Stop after 20 minutes" fails unless it says to run `date` at the start of each round.
+- **Checks:** the main agent reads the project's whole rule set itself, not just the edited files, resolves every reference, and writes `Read in full: …` plus one line per conflict, repeated rule or other issue to `checks/fixes.md`. It fixes them in one round and commits them. `retro-checker` was retired by the user on 2026-11-05 and is blocked by `Agent(retro-checker)` in `~/.claude/settings.json`.
+- **Confirm:** the main agent re-reads the files the fixes touched, plus the files that point into them, and confirms each fix with the line that shows the new text. Pass = 0 open issues of any kind, not only contradictions.
+- **Enforceability:** every rule added or changed must name its check, such as a command, hook, test or required report field. "Stop after 20 minutes" fails unless it says to run `date` at the start of each round.
 - **Smoke test:** each new or changed agent, skill or hook runs once on a tiny task that has no side effects (a dry run or read-only job). A new or changed agent appears at the next turn boundary: end the turn with a background `sleep 15` and check again when it returns, up to 3 turns. Never conclude that a new session is needed. If no safe task exists, the item goes on the "waiting on you" list.
 - **Tests:** the project's tests pass, if it has any.
 
@@ -202,7 +202,7 @@ The pipeline launches one `retro-applier` per approved change set, all in one me
   - the numbers;
   - what changed (commit hashes and one line each);
   - waiting on you, with the `--resume` command when the run is `awaiting approval`;
-  - `Checks:` counts per checker (found, fixed, skipped, open), and `Agents:` the model and effort each kind of agent ran with;
+  - `Checks:` counts (found, fixed, skipped, open), and `Agents:` the model and effort each kind of agent ran with;
   - `.claude/ copies: in sync (<n>)`, from the drift check in the target notes.
 
   It is printed in the terminal and sent as a push notification on finish. A read-only run prints it too.
@@ -240,9 +240,9 @@ These live where the workspace expects them, `antigravity-projects/.claude/`, be
 | `agents/retro-scout.md` | claude-opus-5-5 / medium | Read, Bash, Write (run folder only) |
 | `agents/retro-analyst.md` | claude-opus-5-5 / medium | Read, Bash, Write (its findings file only) |
 | `agents/retro-applier.md` | claude-opus-5-5 / medium | Read, Edit, Write, Bash |
-| `agents/retro-checker.md` | claude-sonnet-5-5 / medium | Read, Bash, Write (its check file only) |
+| `agents/retro-checker.md` | claude-sonnet-5-5 / medium | Retired and blocked, never launched. Read, Bash, Write (its check file only) |
 
-Retro agents, checkers included, follow the user's latest standing model/effort setting (memory `subagent-model-effort.md`). It is passed on every Agent call. The frontmatter above is the fallback when the memory names none. The final note's `Agents:` line records what ran, read from each agent's transcript (the skill's "Model and effort" bullet has the command). The general-purpose agent is never used.
+Retro agents follow the user's latest standing model/effort setting (memory `subagent-model-effort.md`). It is passed on every Agent call. The frontmatter above is the fallback when the memory names none. The final note's `Agents:` line records what ran, read from each agent's transcript (the skill's "Model and effort" bullet has the command). The general-purpose agent is never used.
 
 **Per-project notes:** a `targets/*.md` file whose Aliases line lists the target (or a `retro.md` in the project). The scout and analysts read it first. It lists:
 - **Aliases** (for music videos: slop, hello tomorrow, frutiger aero realm, ne robei), so the scout finds sessions by name.
@@ -285,7 +285,7 @@ Slop is the replay benchmark, because the manual run gives the expected answers.
 |---|---|---|
 | **M1** Scout | `retro` skill (stages 0–1), `retro-scout` agent, `evals/slop-replay.md` | On Slop, the scout finds `be559bb6` (+28 subagents), `4ba9f639`, `e078b0ec` and `d6e38151`; marks `4d1a7a68` as mention-only and today's retro sessions as retro; counts **112 typed prompts (76 / 18 / 12 / 6) plus 13 queued = 125**, **10 h 28 m**, **28 subagents**; names Juno as a hotspot. (The manual count said 111. It left out one pasted-only prompt and the queued ones.) |
 | **M2** Analysis | the lens prompts, `retro-analyst`, the synthesis section of the skill | The Slop report contains ≥ 8 of the 10 reference findings below, each with a quote and a time. |
-| **M3** Apply + verify | approval step, `retro-applier`, `retro-checker`, ledger | On a scratch copy of `music-videos`: commits land, tests pass, 0 open issues of any kind remain after the re-check, and no applier transcript contains a side-effect command. |
+| **M3** Apply + verify | approval step, `retro-applier`, the main agent's rule check, ledger | On a scratch copy of `music-videos`: commits land, tests pass, 0 open issues of any kind remain after the rule check, and no applier transcript contains a side-effect command. |
 | **M4** Recursion | `followup` lens, escalation | Replaying Hello Tomorrow → Slop shows which Hello Tomorrow-era rules were ignored on Slop. |
 | **M5** More sources | AGY and Codex sections in the skill (the end-of-project offer is dropped, §10.3) | The scout handles one AGY and one Codex project. |
 

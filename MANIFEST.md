@@ -25,7 +25,7 @@ It can't see **quality nobody checked.** A lesson a run missed leaves no line in
 
 1. **Seeing problems:** finding the real lessons in a project's logs (scout, lenses).
 2. **Choosing fixes:** picking the fixes that actually save prompts later (synthesis, ranking).
-3. **Applying them safely:** edits that don't break or contradict other rules (appliers, checkers).
+3. **Applying them safely:** edits that don't break or contradict other rules (appliers, the main agent's rule check).
 4. **Cost to the human:** prompts per run.
 
 The 2026-10-18 meta-retro mostly improved 3 and 4: read-only mode, `--resume`, the report check (it caught 3 wrong claims before the approval question), stricter checkers, honest eval scores and self-target mode. It barely touched 1 and 2. Verdict: **probably a little better, not measured.** It is cheaper and safer to run, with no measured change in fix quality. Cheaper runs still feed the flywheel, because they get run more often, and more runs mean more evidence.
